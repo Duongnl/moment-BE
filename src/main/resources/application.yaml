@@ -1,0 +1,17 @@
+server:
+  post: 8080
+  servlet:
+    context-path: /api
+
+spring:
+  datasource:
+    url: "jdbc:mysql://localhost:3306/moment"
+    username: root
+    password: ""
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+jwt:
+  signerKey: "RofoSqL4PFeQxQ8Oo21rxkVxypwLYwXp21pCua9BK/v6bevAReQYwLKhuODeyvBr"
