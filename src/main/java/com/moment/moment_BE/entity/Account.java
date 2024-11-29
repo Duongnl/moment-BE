@@ -17,6 +17,11 @@ import java.util.Set;
 @Setter
 public class Account {
 
+    /*
+    * Doi tuong nay quan ly thong tin tai khoan
+    * Moi quan he 1 1 voi thong tin ca nhan
+    * */
+
     @Id
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.UUID)

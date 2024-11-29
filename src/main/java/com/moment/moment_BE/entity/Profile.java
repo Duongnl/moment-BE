@@ -17,6 +17,11 @@ import java.time.LocalDate;
 @Setter
 public class Profile {
 
+    /*
+     * Doi tuong nay quan ly thong tin ca nhan
+     * Moi quan he 1 1 voi tai khoan
+     * */
+
     @Id
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)

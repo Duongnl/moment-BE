@@ -14,6 +14,12 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 public class NotiView {
+
+    /*
+     * Doi tuong nay quan ly nhung nguoi da xem thong bao
+     * Khi xem thong bao thi 1 dong du lieu se duoc tao ra
+     * */
+
     @Id
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)

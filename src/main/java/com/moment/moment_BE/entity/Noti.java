@@ -17,6 +17,11 @@ import java.util.Set;
 @Setter
 public class Noti {
 
+    /*
+     * Doi tuong nay quan ly thong bao
+     * Moi nguoi lam 1 hanh dong se tao ra 1 thong bao
+     * */
+
     @Id
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
