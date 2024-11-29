@@ -19,14 +19,14 @@ public class AccountController {
     private final AccountService accountService;
 
     @GetMapping()
-    public  Set<Friend> getAll() {
+    public  List<Account> getAll() {
         List<Account> accounts = accountService.getAll();
         Set<Friend> friends = accounts.get(2).getFriends();
-        friends.forEach(f -> {
-            System.out.println(f.getFriend().getUserName());
+        accounts.forEach(f -> {
+            System.out.println(f.getProfile().getName());
 
         });
-        return friends;
+        return accountService.getAll();
     }
 
 }

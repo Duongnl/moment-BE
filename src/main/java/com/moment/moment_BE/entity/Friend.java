@@ -15,6 +15,11 @@ import java.time.LocalDateTime;
 @Setter
 public class Friend {
 
+    /*
+     * Doi tuong nay quan ly moi quan he ban be
+     * Moi quan he 2 chieu
+     * */
+
     @Id
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)

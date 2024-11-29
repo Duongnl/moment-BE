@@ -15,6 +15,10 @@ import java.time.LocalDateTime;
 @Setter
 public class Photo {
 
+    /*
+     * Doi tuong nay chua thong tin anh
+     * */
+
     @Id
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
