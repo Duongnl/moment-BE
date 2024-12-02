@@ -11,9 +11,9 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
-  web:
-    cors:
-      allowed-origin: "${ALLOWED_ORIGIN}"
+
 
 jwt:
   signerKey: "${SIGNER_KEY}"
+
+allowed: "${ALLOWED_ORIGIN}"

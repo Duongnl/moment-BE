@@ -33,7 +33,7 @@ public class SecurityConfig {
     @Value("${jwt.signerKey}")
     private  String singerKey;
 
-    @Value("${spring.web.cors.allowed-origin}")
+    @Value("${allowed}")
     private String allowedOrigin;
 
 
@@ -56,6 +56,7 @@ public class SecurityConfig {
 //
 //      mac dinh  tat cau hinh nay di
         httpSecurity.csrf(AbstractHttpConfigurer::disable);
+        httpSecurity.addFilterBefore(corsFilter(), CorsFilter.class);
         return httpSecurity.build();
     }
 
@@ -71,20 +72,17 @@ public class SecurityConfig {
 
     @Bean
     public CorsFilter corsFilter() {
-        System.out.println("allowedOrigin >>> " + allowedOrigin);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
 
         // Chỉ cho phép origin http://localhost:3000
-        config.addAllowedOriginPattern(allowedOrigin);
+        config.addAllowedOrigin(allowedOrigin);
         // Cho phép tất cả các HTTP method (GET, POST, etc.)
         config.addAllowedMethod("*");
         // Cho phép tất cả các header
         config.addAllowedHeader("*");
         // Cấu hình khác (nếu cần)
         config.setAllowCredentials(true); // Cho phép gửi thông tin xác thực (credentials) như cookies, authorization headers
-
-
 
         source.registerCorsConfiguration("/**", config);
         return new CorsFilter(source);
