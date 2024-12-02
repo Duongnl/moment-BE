@@ -5,10 +5,14 @@ import com.moment.moment_BE.dto.request.IntrospectRequest;
 import com.moment.moment_BE.dto.response.ApiResponse;
 import com.moment.moment_BE.dto.response.AuthenticationResponse;
 import com.moment.moment_BE.dto.response.IntrospectResponse;
+import com.moment.moment_BE.dto.response.UserResponse;
 import com.moment.moment_BE.entity.Account;
+import com.moment.moment_BE.entity.Profile;
 import com.moment.moment_BE.exception.AccountErrorCode;
 import com.moment.moment_BE.exception.AppException;
 import com.moment.moment_BE.exception.GlobalErrorCode;
+import com.moment.moment_BE.mapper.AccountMapper;
+import com.moment.moment_BE.mapper.ProfileMapper;
 import com.moment.moment_BE.repository.AccountRepository;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
@@ -20,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -121,6 +126,8 @@ public class AuthenticationService {
 
 
     }
+
+
 
 }
 

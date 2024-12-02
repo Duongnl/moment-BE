@@ -5,16 +5,14 @@ import com.moment.moment_BE.dto.request.IntrospectRequest;
 import com.moment.moment_BE.dto.response.ApiResponse;
 import com.moment.moment_BE.dto.response.AuthenticationResponse;
 import com.moment.moment_BE.dto.response.IntrospectResponse;
+import com.moment.moment_BE.dto.response.UserResponse;
 import com.moment.moment_BE.service.AuthenticationService;
 import com.nimbusds.jose.JOSEException;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.text.ParseException;
 
@@ -28,7 +26,7 @@ public class AuthenticationController {
 
     //    dang nhap, neu dung thi tao ra token
     @PostMapping("/token")
-    public ApiResponse<AuthenticationResponse> authenticate (@RequestBody @Valid AuthenticationRequest authenticationRequest) {
+    public ApiResponse<AuthenticationResponse> authenticate (@RequestBody AuthenticationRequest authenticationRequest) {
         return ApiResponse.<AuthenticationResponse>builder()
                 .result(authenticationService.authenticate(authenticationRequest))
                 .build();
@@ -46,6 +44,8 @@ public class AuthenticationController {
                 .result(result)
                 .build();
     }
+
+
 
 
 }

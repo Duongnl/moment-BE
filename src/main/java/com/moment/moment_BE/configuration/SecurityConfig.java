@@ -41,7 +41,8 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
 //       cac request trong nay la se duoc public vi dung dang nhap
         httpSecurity.authorizeHttpRequests(request ->
-                request.requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS).permitAll()
+                request.requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS)
+                        .permitAll()
 
                         .anyRequest().authenticated());
 
@@ -50,6 +51,7 @@ public class SecurityConfig {
 //        ham nay de cho phep nhan token, khi o front end gui token qua header Authorization thi ham cai nay se nhan duoc
         httpSecurity.oauth2ResourceServer(oauth2 ->
                         oauth2.jwt(jwtConfigurer -> jwtConfigurer.decoder(jwtDecoder()))
+                                .authenticationEntryPoint(new JwtAuthenticationEntryPoint())
         );
 //
 //      mac dinh  tat cau hinh nay di
@@ -69,6 +71,7 @@ public class SecurityConfig {
 
     @Bean
     public CorsFilter corsFilter() {
+        System.out.println("allowedOrigin >>> " + allowedOrigin);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
 
@@ -80,6 +83,8 @@ public class SecurityConfig {
         config.addAllowedHeader("*");
         // Cấu hình khác (nếu cần)
         config.setAllowCredentials(true); // Cho phép gửi thông tin xác thực (credentials) như cookies, authorization headers
+
+
 
         source.registerCorsConfiguration("/**", config);
         return new CorsFilter(source);
