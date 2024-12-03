@@ -6,6 +6,7 @@ import com.moment.moment_BE.dto.response.ApiResponse;
 import com.moment.moment_BE.dto.response.AuthenticationResponse;
 import com.moment.moment_BE.dto.response.IntrospectResponse;
 import com.moment.moment_BE.dto.response.UserResponse;
+import com.moment.moment_BE.service.AccountService;
 import com.moment.moment_BE.service.AuthenticationService;
 import com.nimbusds.jose.JOSEException;
 import jakarta.validation.Valid;
@@ -23,6 +24,7 @@ import java.text.ParseException;
 public class AuthenticationController {
 
     AuthenticationService authenticationService;
+
 
     //    dang nhap, neu dung thi tao ra token
     @PostMapping("/token")
@@ -42,6 +44,13 @@ public class AuthenticationController {
 //        kieu khoi tao apirespone voi  result la result ben tren
         return ApiResponse.<IntrospectResponse>builder()
                 .result(result)
+                .build();
+    }
+
+    @GetMapping("/my-info")
+    public ApiResponse<UserResponse> getMyInfo () {
+        return ApiResponse.<UserResponse>builder()
+                .result(authenticationService.getMyInfo())
                 .build();
     }
 
