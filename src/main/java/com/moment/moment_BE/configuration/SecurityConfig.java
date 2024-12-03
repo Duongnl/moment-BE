@@ -1,7 +1,5 @@
 package com.moment.moment_BE.configuration;
 
-import lombok.AccessLevel;
-import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,8 +11,6 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
-import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -33,7 +29,7 @@ public class SecurityConfig {
     @Value("${jwt.signerKey}")
     private  String singerKey;
 
-    @Value("${spring.web.cors.allowed-origin}")
+    @Value("${allowed}")
     private String allowedOrigin;
 
 
@@ -41,7 +37,8 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
 //       cac request trong nay la se duoc public vi dung dang nhap
         httpSecurity.authorizeHttpRequests(request ->
-                request.requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS).permitAll()
+                request.requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS)
+                        .permitAll()
 
                         .anyRequest().authenticated());
 
@@ -50,10 +47,12 @@ public class SecurityConfig {
 //        ham nay de cho phep nhan token, khi o front end gui token qua header Authorization thi ham cai nay se nhan duoc
         httpSecurity.oauth2ResourceServer(oauth2 ->
                         oauth2.jwt(jwtConfigurer -> jwtConfigurer.decoder(jwtDecoder()))
+                                .authenticationEntryPoint(new JwtAuthenticationEntryPoint())
         );
 //
 //      mac dinh  tat cau hinh nay di
         httpSecurity.csrf(AbstractHttpConfigurer::disable);
+        httpSecurity.addFilterBefore(corsFilter(), CorsFilter.class);
         return httpSecurity.build();
     }
 
@@ -73,7 +72,7 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
 
         // Chỉ cho phép origin http://localhost:3000
-        config.addAllowedOriginPattern(allowedOrigin);
+        config.addAllowedOrigin(allowedOrigin);
         // Cho phép tất cả các HTTP method (GET, POST, etc.)
         config.addAllowedMethod("*");
         // Cho phép tất cả các header
