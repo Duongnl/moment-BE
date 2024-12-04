@@ -37,17 +37,17 @@ public class Friend {
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false, referencedColumnName = "id")
     @JsonBackReference
-    private Account user;
+    private Account accountUser;
 
     @ManyToOne
     @JoinColumn(name = "friend_id", nullable = false, referencedColumnName = "id")
     @JsonBackReference
-    private Account friend;
+    private Account accountFriend;
 
     @ManyToOne
     @JoinColumn(name = "initiator_id", nullable = false, referencedColumnName = "id")
     @JsonBackReference
-    private Account initiator;
+    private Account accountInitiator;
 
 
 

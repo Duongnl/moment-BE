@@ -61,7 +61,7 @@ public class Account {
     @JsonManagedReference
     private Set<NotiView> notiViews;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "accountUser", cascade = CascadeType.ALL)
     @JsonManagedReference
     private Set<Friend> friends;
 

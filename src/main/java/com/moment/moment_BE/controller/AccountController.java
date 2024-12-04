@@ -24,12 +24,17 @@ public class AccountController {
 
     @GetMapping()
     public  List<Account> getAll() {
+//        lay ra all account
         List<Account> accounts = accountService.getAll();
-        Set<Friend> friends = accounts.get(2).getFriends();
-        accounts.forEach(f -> {
-            System.out.println(f.getProfile().getName());
+
+//        list
+        Set<Friend> friends = accounts.get(1).getFriends();
+
+        friends.forEach(f -> {
+            System.out.println(f.getAccountFriend().getProfile());
 
         });
+
         return accountService.getAll();
     }
 
