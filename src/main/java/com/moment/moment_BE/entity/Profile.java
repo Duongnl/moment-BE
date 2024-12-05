@@ -30,6 +30,9 @@ public class Profile {
     @Column(name = "name")
     private String name;
 
+    @Column(name = "sex")
+    private String sex;
+
     @Column(name = "birthday", columnDefinition = "date")
     private LocalDate birthday;
 

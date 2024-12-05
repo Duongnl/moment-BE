@@ -51,6 +51,7 @@ public class AuthenticationController {
     public ApiResponse<UserResponse> getMyInfo () {
         return ApiResponse.<UserResponse>builder()
                 .result(authenticationService.getMyInfo())
+
                 .build();
     }
 
