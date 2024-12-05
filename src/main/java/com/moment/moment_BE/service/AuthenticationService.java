@@ -127,6 +127,7 @@ public class AuthenticationService {
 
     }
 
+    // lay info
     public UserResponse getMyInfo () {
         var context = SecurityContextHolder.getContext();
         String name = context.getAuthentication().getName();
