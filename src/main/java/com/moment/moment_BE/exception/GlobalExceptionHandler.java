@@ -11,6 +11,7 @@ import java.util.List;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
+//    handle app exception
     @ExceptionHandler(value = AppException.class)
     ResponseEntity<ApiResponse<?>> handlingAppException (AppException appException){
 
