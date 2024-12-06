@@ -34,9 +34,9 @@ public class PhotoService {
     AccountMapper accountMapper;
 
 // lay anh cua ban be o pageCurrent voi so luong size tu thoi gian startTime voi status
-    public List<PhotoResponse> getListPhotoMyFriends(PhotoFilterRequest photoFilterRequest) {
+    public List<PhotoResponse> getListPhotoMyFriends(PhotoFilterRequest photoFilterRequest,int status) {
 
-        Account account = authenticationService.getMyAccount();
+        Account account = authenticationService.getMyAccount(status);
         List<String> accountsFriend = new ArrayList<>();
 
         for(Friend friend : account.getFriends()) {
@@ -64,7 +64,7 @@ public class PhotoService {
     }
 
     public List<Photo> getListPhotoByAccount(int size, int pageCurrent, LocalDateTime startTime, int status ) {
-        Account account = authenticationService.getMyAccount();
+        Account account = authenticationService.getMyAccount(status);
         List<String> accountsFriend = new ArrayList<>();
 
         for(Friend friend : account.getFriends()) {

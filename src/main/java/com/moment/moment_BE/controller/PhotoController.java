@@ -28,7 +28,7 @@ public class PhotoController {
     @PostMapping("")
     public ApiResponse<List<PhotoResponse>> getListPhotoFriends(@RequestBody PhotoFilterRequest photoFilterRequest) {
         List<PhotoResponse> photos = photoService.getListPhotoMyFriends(
-                photoFilterRequest
+                photoFilterRequest,1
         );
         return ApiResponse.<List<PhotoResponse>>builder()
                 .result(photos)

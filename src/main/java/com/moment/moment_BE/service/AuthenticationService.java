@@ -142,11 +142,11 @@ public class AuthenticationService {
 
         return userResponse;
     }
-    public Account getMyAccount () {
+    public Account getMyAccount (int status) {
         var context = SecurityContextHolder.getContext();
         String name = context.getAuthentication().getName();
-        return accountRepository.findByUserName(name).orElseThrow(
-                () -> new AppException(GlobalErrorCode.USER_NOT_FOUND)
+        return accountRepository.findByUserNameAndStatus(name, status).orElseThrow(
+                () -> new AppException(AccountErrorCode.USER_NOT_FOUND)
         );
     }
 
