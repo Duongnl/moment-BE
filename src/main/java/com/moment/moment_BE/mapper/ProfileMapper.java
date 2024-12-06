@@ -1,5 +1,6 @@
 package com.moment.moment_BE.mapper;
 
+import com.moment.moment_BE.dto.request.RegisterRequest;
 import com.moment.moment_BE.dto.response.UserResponse;
 import com.moment.moment_BE.entity.Profile;
 import org.mapstruct.Mapper;
@@ -10,4 +11,6 @@ import org.mapstruct.MappingTarget;
 public interface ProfileMapper {
     @Mapping(target = "id", ignore = true)
     void toUserResponse(@MappingTarget UserResponse userResponse, Profile profile);
+
+    Profile toProfile(RegisterRequest registerRequest);
 }

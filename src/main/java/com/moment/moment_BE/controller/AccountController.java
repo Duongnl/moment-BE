@@ -2,6 +2,7 @@ package com.moment.moment_BE.controller;
 
 import com.moment.moment_BE.dto.request.RegisterRequest;
 import com.moment.moment_BE.dto.response.ApiResponse;
+import com.moment.moment_BE.dto.response.AuthenticationResponse;
 import com.moment.moment_BE.entity.Account;
 import com.moment.moment_BE.entity.Friend;
 import com.moment.moment_BE.service.AccountService;
@@ -40,11 +41,10 @@ public class AccountController {
     }
 
     @PostMapping("/register")
-    public String register(@RequestBody @Valid RegisterRequest registerRequest) {
-
-        System.out.println("Register >>> "+registerRequest.toString());
-
-        return  registerRequest.toString();
+    public ApiResponse<AuthenticationResponse> register(@RequestBody @Valid RegisterRequest registerRequest) {
+        return  ApiResponse.<AuthenticationResponse>builder()
+                .result(accountService.register(registerRequest))
+                .build();
     }
 
 

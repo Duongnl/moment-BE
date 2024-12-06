@@ -75,7 +75,7 @@ public class AuthenticationService {
 
 //    login ne
     public AuthenticationResponse authenticate(AuthenticationRequest request){
-        var user = accountRepository.findByUserName(request.getUserName())
+        var user = accountRepository.findByUserNameAndStatus(request.getUserName(),1)
                 .orElseThrow(()-> new AppException(AccountErrorCode.USER_NOT_FOUND));
 
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
@@ -98,7 +98,7 @@ public class AuthenticationService {
 
 
     //    tao token bang username
-    private String generateToken(Account account){
+    public String generateToken(Account account){
 
 //        tao header
         JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
@@ -132,7 +132,7 @@ public class AuthenticationService {
     public UserResponse getMyInfo () {
         var context = SecurityContextHolder.getContext();
         String name = context.getAuthentication().getName();
-        Account account = accountRepository.findByUserName(name).orElseThrow(
+        Account account = accountRepository.findByUserNameAndStatus(name, 1).orElseThrow(
                 () -> new AppException(AccountErrorCode.USER_NOT_FOUND)
         );
 
