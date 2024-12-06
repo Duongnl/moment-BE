@@ -2,14 +2,15 @@ package com.moment.moment_BE.exception;
 
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 
 @Getter
-public enum AccountErrorCode implements ErrorCode {
-    USER_NOT_FOUND("ACCOUNT_1","User not found", HttpStatus.NOT_FOUND),
+public enum AuthErrorCode implements ErrorCode{
+    UNAUTHENTICATED("AUTH_1","Unauthenticated", HttpStatus.UNAUTHORIZED),
+
+
     ;
 
-    AccountErrorCode(String code, String message, HttpStatus httpStatus) {
+    AuthErrorCode(String code, String message, HttpStatus httpStatus) {
         this.code = code;
         this.message = message;
         this.httpStatus = httpStatus;
@@ -18,4 +19,6 @@ public enum AccountErrorCode implements ErrorCode {
     private String code;
     private String message;
     private HttpStatus httpStatus;
+
+
 }

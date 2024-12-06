@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.moment.moment_BE.dto.response.ApiResponse;
 import com.moment.moment_BE.dto.response.ErrorResponse;
 import com.moment.moment_BE.exception.ErrorCode;
-import com.moment.moment_BE.exception.GlobalErrorCode;
+import com.moment.moment_BE.exception.AuthErrorCode;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -22,7 +22,7 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
         System.out.println("Origin: " + request.getHeader("Origin"));
         System.out.println("Method: " + request.getMethod());
 
-        ErrorCode errorCode = GlobalErrorCode.UNAUTHENTICATED;
+        ErrorCode errorCode = AuthErrorCode.UNAUTHENTICATED;
 
 //        set 401
         response.setStatus(errorCode.getHttpStatus().value());

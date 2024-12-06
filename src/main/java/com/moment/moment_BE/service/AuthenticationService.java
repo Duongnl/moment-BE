@@ -6,8 +6,9 @@ import com.moment.moment_BE.dto.response.AuthenticationResponse;
 import com.moment.moment_BE.dto.response.IntrospectResponse;
 import com.moment.moment_BE.dto.response.UserResponse;
 import com.moment.moment_BE.entity.Account;
+import com.moment.moment_BE.exception.AccountErrorCode;
 import com.moment.moment_BE.exception.AppException;
-import com.moment.moment_BE.exception.GlobalErrorCode;
+import com.moment.moment_BE.exception.AuthErrorCode;
 import com.moment.moment_BE.mapper.AccountMapper;
 import com.moment.moment_BE.mapper.ProfileMapper;
 import com.moment.moment_BE.repository.AccountRepository;
@@ -59,7 +60,7 @@ public class AuthenticationService {
 //        tra ve true hoac flase
         var verified =  signedJWT.verify(verifier);
         if (!verified) {
-            throw new AppException(GlobalErrorCode.UNAUTHENTICATED);
+            throw new AppException(AuthErrorCode.UNAUTHENTICATED);
         } else {
             //         tra ve introspectresponse
             return IntrospectResponse.builder()
@@ -75,7 +76,7 @@ public class AuthenticationService {
 //    login ne
     public AuthenticationResponse authenticate(AuthenticationRequest request){
         var user = accountRepository.findByUserName(request.getUserName())
-                .orElseThrow(()-> new AppException(GlobalErrorCode.USER_NOT_FOUND));
+                .orElseThrow(()-> new AppException(AccountErrorCode.USER_NOT_FOUND));
 
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
 //        so sanh pass ng dung nhap vaao va pass o dataabase
@@ -83,7 +84,7 @@ public class AuthenticationService {
                 user.getPassword());
 //        neu dang nhap khong thanh cong
         if (!authenticated) {
-            throw new AppException(GlobalErrorCode.UNAUTHENTICATED);
+            throw new AppException(AuthErrorCode.UNAUTHENTICATED);
         } else {
 //            dang nhap thanh cong
             var token = generateToken(user);
@@ -132,7 +133,7 @@ public class AuthenticationService {
         var context = SecurityContextHolder.getContext();
         String name = context.getAuthentication().getName();
         Account account = accountRepository.findByUserName(name).orElseThrow(
-                () -> new AppException(GlobalErrorCode.USER_NOT_FOUND)
+                () -> new AppException(AccountErrorCode.USER_NOT_FOUND)
         );
 
         UserResponse userResponse = new UserResponse();
