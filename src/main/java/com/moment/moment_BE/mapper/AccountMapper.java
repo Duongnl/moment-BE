@@ -5,6 +5,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
 import com.moment.moment_BE.dto.response.PhotoResponse;
+import com.moment.moment_BE.dto.request.RegisterRequest;
 import com.moment.moment_BE.dto.response.UserResponse;
 import com.moment.moment_BE.entity.Account;
 
@@ -17,4 +18,5 @@ public interface AccountMapper {
     @Mapping(source = "profile.name", target="name")
 //    @Mapping(source = "profile.url", target="urlAvt") map bang service
     void toPhotoResponse(@MappingTarget PhotoResponse photoResponse, Account account);
+    Account toAccount(RegisterRequest registerRequest);
 }
