@@ -24,7 +24,7 @@ import javax.crypto.spec.SecretKeySpec;
 @EnableMethodSecurity // phan quyen theo method
 public class SecurityConfig {
 
-   private final String[] PUBLIC_ENDPOINTS = { "/auth/token", "/auth/introspect"};
+   private final String[] PUBLIC_ENDPOINTS = { "/auth/token", "/auth/introspect","/account/register"};
 
     @Value("${jwt.signerKey}")
     private  String singerKey;
@@ -72,7 +72,7 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
 
         // Chỉ cho phép origin http://localhost:3000
-        config.addAllowedOrigin(allowedOrigin);
+        config.addAllowedOriginPattern(allowedOrigin);
         // Cho phép tất cả các HTTP method (GET, POST, etc.)
         config.addAllowedMethod("*");
         // Cho phép tất cả các header
