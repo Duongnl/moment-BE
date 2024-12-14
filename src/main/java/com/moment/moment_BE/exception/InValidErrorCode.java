@@ -12,6 +12,8 @@ public enum InValidErrorCode implements  ErrorCode{
     DATE_INVALID ("INVALID_5", "Invalid date", HttpStatus.BAD_REQUEST),
     NAME_INVALID ("INVALID_6", "Invalid name", HttpStatus.BAD_REQUEST),
     JSON_INVALID ("INVALID_7", "Invalid json", HttpStatus.BAD_REQUEST),
+    NOT_BLANK ("INVALID_8", "Invalid blank", HttpStatus.BAD_REQUEST),
+    NOT_NULL ("INVALID_9", "Invalid null", HttpStatus.BAD_REQUEST),
 
     ;
 

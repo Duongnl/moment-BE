@@ -2,6 +2,8 @@ package com.moment.moment_BE.controller;
 
 import java.util.List;
 
+import com.moment.moment_BE.dto.request.PostRequest;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,13 +24,13 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class PhotoController {
 
-     PhotoService photoService;
+    PhotoService photoService;
 
 
     @PostMapping("")
     public ApiResponse<List<PhotoResponse>> getListPhotoFriends(@RequestBody PhotoFilterRequest photoFilterRequest) {
         List<PhotoResponse> photos = photoService.getListPhotoMyFriends(
-                photoFilterRequest,1
+                photoFilterRequest, 1
         );
         return ApiResponse.<List<PhotoResponse>>builder()
                 .result(photos)
@@ -36,6 +38,13 @@ public class PhotoController {
                 .build();
     }
 
+    @PostMapping("/post")
+    public ApiResponse<?> post(@RequestBody @Valid PostRequest postRequest) {
+
+        photoService.post(postRequest);
+
+        return ApiResponse.builder().build();
+    }
 
 
 }
