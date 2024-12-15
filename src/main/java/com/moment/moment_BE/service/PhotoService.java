@@ -2,6 +2,9 @@ package com.moment.moment_BE.service;
 
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,8 +54,17 @@ public class PhotoService {
                 accountsFriend.add(friend.getAccountFriend().getId());
             }
         }
+        accountsFriend.add(account.getId());
         Pageable pageable = PageRequest.of(photoFilterRequest.getPageCurrent(), 5);
-        List<Photo> photos = photoRepository.findByAccount_IdInAndStatusAndCreatedAtLessThanEqualOrderByCreatedAtDesc(accountsFriend, 1, photoFilterRequest.getTime(), pageable);
+
+
+        ZonedDateTime utcZonedDateTime = ZonedDateTime.parse(photoFilterRequest.getTime(), DateTimeFormatter.ISO_DATE_TIME);
+
+        // Bước 2: Chuyển đổi từ UTC sang múi giờ người dùng
+        ZoneId userZoneId = ZoneId.of(photoFilterRequest.getTimezone());
+        ZonedDateTime userZonedDateTime = utcZonedDateTime.withZoneSameInstant(userZoneId);
+        
+        List<Photo> photos = photoRepository.findByAccount_IdInAndStatusAndCreatedAtLessThanEqualOrderByCreatedAtDesc(accountsFriend, 1, userZonedDateTime.toLocalDateTime(), pageable);
         List<PhotoResponse> photoResponses = new ArrayList<>();
         for (Photo photo : photos) {
             PhotoResponse photoResponse = photoMapper.toPhotoResponse(photo);
