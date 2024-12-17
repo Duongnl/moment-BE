@@ -75,7 +75,11 @@ public class AccountService {
 
     }
 
-
+    public Account findByIdAndStatus(String accountId,int status) {
+        return accountRepository.findByIdAndStatus(accountId,status).orElseThrow(
+                () -> new AppException(AccountErrorCode.USER_NOT_FOUND)
+        );
+    }
 
 
 }
