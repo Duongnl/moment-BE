@@ -1,6 +1,19 @@
 package com.moment.moment_BE.service;
 
 
+import static com.moment.moment_BE.utils.DateTimeUtils.getCurrentTimeInSystemLocalTime;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.moment.moment_BE.dto.request.FriendInviteRequest;
 import com.moment.moment_BE.dto.request.RegisterRequest;
 import com.moment.moment_BE.dto.response.AccountResponse;
@@ -17,21 +30,10 @@ import com.moment.moment_BE.mapper.ProfileMapper;
 import com.moment.moment_BE.repository.AccountRepository;
 import com.moment.moment_BE.repository.FriendRepository;
 import com.moment.moment_BE.repository.ProfileRepository;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 
 @Service
 // kh khai bao gi het thi no autowired va private
@@ -173,7 +175,7 @@ public class AccountService {
             friend = new Friend();
             friend.setAccountUser(account);
             friend.setAccountFriend(accountFriend);
-            friend.setRequestedAt(LocalDateTime.now());
+            friend.setRequestedAt(getCurrentTimeInSystemLocalTime());
             friend.setStatus("pending");
             friend.setAccountInitiator(account);
             friendRepository.save(friend);
@@ -181,7 +183,7 @@ public class AccountService {
             Friend friendRP = new Friend();
             friendRP.setAccountUser(accountFriend);
             friendRP.setAccountFriend(account);
-            friendRP.setRequestedAt(LocalDateTime.now());
+            friendRP.setRequestedAt(getCurrentTimeInSystemLocalTime());
             friendRP.setStatus("pending");
             friendRP.setAccountInitiator(account);
             friendRepository.save(friendRP);
@@ -219,8 +221,8 @@ public class AccountService {
                 friendRP.setStatus("pending");
             }
 
-        friend.setAcceptedAt(LocalDateTime.now());
-        friendRP.setAcceptedAt(LocalDateTime.now());
+        friend.setAcceptedAt(getCurrentTimeInSystemLocalTime());
+        friendRP.setAcceptedAt(getCurrentTimeInSystemLocalTime());
         friendRepository.save(friend);
         friendRepository.save(friendRP);
         return toAccountResponse(friend.getAccountFriend(), friend.getStatus(), friend.getRequestedAt(), friend.getAccountInitiator() == account);
