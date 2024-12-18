@@ -23,5 +23,6 @@ public class UserResponse {
     String name;
     LocalDate birthday;
     String address;
+    String urlPhoto;
     int status;
 }
