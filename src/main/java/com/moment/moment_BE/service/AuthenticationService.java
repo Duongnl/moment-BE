@@ -6,12 +6,14 @@ import com.moment.moment_BE.dto.response.AuthenticationResponse;
 import com.moment.moment_BE.dto.response.IntrospectResponse;
 import com.moment.moment_BE.dto.response.UserResponse;
 import com.moment.moment_BE.entity.Account;
+import com.moment.moment_BE.entity.Photo;
 import com.moment.moment_BE.exception.AccountErrorCode;
 import com.moment.moment_BE.exception.AppException;
 import com.moment.moment_BE.exception.AuthErrorCode;
 import com.moment.moment_BE.mapper.AccountMapper;
 import com.moment.moment_BE.mapper.ProfileMapper;
 import com.moment.moment_BE.repository.AccountRepository;
+import com.moment.moment_BE.repository.PhotoRepository;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
@@ -43,6 +45,7 @@ public class AuthenticationService {
 
     AccountMapper accountMapper;
     ProfileMapper profileMapper;
+    PhotoRepository photoRepository;
 
     // kiem tra xem token co hop le khong
     public IntrospectResponse introspect(IntrospectRequest request)
@@ -139,6 +142,15 @@ public class AuthenticationService {
         UserResponse userResponse = new UserResponse();
         userResponse = accountMapper.toUserResponse(account);
         profileMapper.toUserResponse(userResponse,account.getProfile());
+
+//        set avatar
+        String avt = null;
+        Photo photoOptional = photoRepository.findByAccount_IdAndStatus(userResponse.getId(), 2);
+        if (photoOptional != null) {
+            avt = photoOptional.getUrl();
+        }
+        userResponse.setUrlPhoto(avt);
+
 
         return userResponse;
     }
