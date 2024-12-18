@@ -11,7 +11,7 @@ import lombok.experimental.FieldDefaults;
 @Setter
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class FriendResponse {
+public class AccountResponse {
     String name;
 
     String urlPhoto;

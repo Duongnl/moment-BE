@@ -2,7 +2,6 @@ package com.moment.moment_BE.controller;
 
 import com.moment.moment_BE.dto.request.FriendInviteRequest;
 import com.moment.moment_BE.dto.response.ApiResponse;
-import com.moment.moment_BE.dto.response.FriendResponse;
 import com.moment.moment_BE.service.FriendService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -19,27 +18,28 @@ import java.util.List;
 public class FriendController {
    FriendService friendService;
 
-   @GetMapping()
-   public ApiResponse<List<FriendResponse>> getFriends() {
-       List<FriendResponse> profileFriend = friendService.getListFriends(1);
+//    @PostMapping("/add")
+//    public ApiResponse<?> addFriend(@RequestBody @Valid FriendInviteRequest friendInviteRequest) {
+//
+//       FriendResponse friendResponse=friendService.addFriend(friendInviteRequest,1);
+//
+//        return ApiResponse.builder().result(friendResponse).build();
+//    }
+//
+//    @PostMapping("/status")
+//    public ApiResponse<?> addFriendStatus(@RequestBody @Valid FriendInviteRequest friendInviteRequest) {
+//
+//        FriendResponse friendResponse =friendService.changeStatusFriend(friendInviteRequest,1);
+//
+//        return ApiResponse.builder().result(friendResponse).build();
+//    }
+//
+//    @GetMapping("/find")
+//    public ApiResponse<?> searchFriend( @RequestParam String valueFind) {
+//
+//        List<FriendResponse> friendResponse=friendService.searchFriend(valueFind,1);
+//
+//        return ApiResponse.builder().result(friendResponse).build();
+//    }
 
-       return ApiResponse.<List<FriendResponse>>builder()
-               .result(profileFriend)
-               .build();
-   }
-    @PostMapping("/add")
-    public ApiResponse<?> addFriend(@RequestBody @Valid FriendInviteRequest friendInviteRequest) {
-
-       friendService.addFriend(friendInviteRequest,1);
-
-        return ApiResponse.builder().build();
-    }
-
-    @PostMapping("/status")
-    public ApiResponse<?> addFriendStatus(@RequestBody @Valid FriendInviteRequest friendInviteRequest) {
-
-        friendService.changeStatusFriend(friendInviteRequest,1);
-
-        return ApiResponse.builder().build();
-    }
 }
