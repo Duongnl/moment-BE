@@ -1,6 +1,8 @@
 package com.moment.moment_BE.controller;
 
+import com.moment.moment_BE.dto.request.FriendInviteRequest;
 import com.moment.moment_BE.dto.request.RegisterRequest;
+import com.moment.moment_BE.dto.response.AccountResponse;
 import com.moment.moment_BE.dto.response.ApiResponse;
 import com.moment.moment_BE.dto.response.AuthenticationResponse;
 import com.moment.moment_BE.entity.Account;
@@ -47,6 +49,39 @@ public class AccountController {
                 .build();
     }
 
+    @GetMapping("/friend")
+    public ApiResponse<List<AccountResponse>> getFriends() {
+        List<AccountResponse> profileFriend = accountService.getListAccountFriend(1);
+
+        return ApiResponse.<List<AccountResponse>>builder()
+                .result(profileFriend)
+                .build();
+    }
+
+    @PostMapping("/friend/add")
+    public ApiResponse<?> addFriend(@RequestBody @Valid FriendInviteRequest friendInviteRequest) {
+
+       AccountResponse friendResponse=accountService.addFriend(friendInviteRequest,1);
+
+        return ApiResponse.builder().result(friendResponse).build();
+    }
+
+
+    @PostMapping("friend/status")
+    public ApiResponse<?> changeFriendStatus(@RequestBody @Valid FriendInviteRequest friendInviteRequest) {
+
+        AccountResponse friendResponse =accountService.changeStatusFriend(friendInviteRequest,1);
+
+        return ApiResponse.builder().result(friendResponse).build();
+    }
+
+    @GetMapping("/search")
+    public ApiResponse<?> searchFriend( @RequestParam String s) {
+
+        List<AccountResponse> friendResponse=accountService.searchAccount(s,1);
+
+        return ApiResponse.builder().result(friendResponse).build();
+    }
 
 
 }

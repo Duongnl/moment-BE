@@ -9,7 +9,7 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.moment</groupId>
-	<artifactId>moment-BE</artifactId>
+	<artifactId>moment-BE</artifactId> 
 	<version>0.0.1-SNAPSHOT</version>
 	<name>moment-BE</name>
 	<description>Demo project for Spring Boot</description>

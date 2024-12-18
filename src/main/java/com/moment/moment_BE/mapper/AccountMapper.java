@@ -1,5 +1,6 @@
 package com.moment.moment_BE.mapper;
 
+import com.moment.moment_BE.dto.response.AccountResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
@@ -19,4 +20,7 @@ public interface AccountMapper {
 //    @Mapping(source = "profile.url", target="urlAvt") map bang service
     void toPhotoResponse(@MappingTarget PhotoResponse photoResponse, Account account);
     Account toAccount(RegisterRequest registerRequest);
+
+    @Mapping(source = "profile.name", target="name")
+    AccountResponse toAccountResponse(Account account);
 }

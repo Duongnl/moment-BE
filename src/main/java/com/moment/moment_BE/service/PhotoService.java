@@ -1,30 +1,29 @@
 package com.moment.moment_BE.service;
 
 
+import static com.moment.moment_BE.utils.DateTimeUtils.convertUtcToUserLocalTime;
+
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.moment.moment_BE.dto.request.PostRequest;
-import com.moment.moment_BE.exception.AccountErrorCode;
-import com.moment.moment_BE.exception.AppException;
-import com.moment.moment_BE.exception.PhotoErrorCode;
-import com.moment.moment_BE.repository.AccountRepository;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.moment.moment_BE.dto.request.PhotoFilterRequest;
+import com.moment.moment_BE.dto.request.PostRequest;
 import com.moment.moment_BE.dto.response.PhotoResponse;
 import com.moment.moment_BE.entity.Account;
 import com.moment.moment_BE.entity.Friend;
 import com.moment.moment_BE.entity.Photo;
+import com.moment.moment_BE.exception.AccountErrorCode;
+import com.moment.moment_BE.exception.AppException;
+import com.moment.moment_BE.exception.PhotoErrorCode;
 import com.moment.moment_BE.mapper.AccountMapper;
 import com.moment.moment_BE.mapper.PhotoMapper;
+import com.moment.moment_BE.repository.AccountRepository;
 import com.moment.moment_BE.repository.PhotoRepository;
 
 import lombok.AccessLevel;
@@ -57,14 +56,14 @@ public class PhotoService {
         accountsFriend.add(account.getId());
         Pageable pageable = PageRequest.of(photoFilterRequest.getPageCurrent(), 5);
 
-
-        ZonedDateTime utcZonedDateTime = ZonedDateTime.parse(photoFilterRequest.getTime(), DateTimeFormatter.ISO_DATE_TIME);
-
-        // Bước 2: Chuyển đổi từ UTC sang múi giờ người dùng
-        ZoneId userZoneId = ZoneId.of(photoFilterRequest.getTimezone());
-        ZonedDateTime userZonedDateTime = utcZonedDateTime.withZoneSameInstant(userZoneId);
         
-        List<Photo> photos = photoRepository.findByAccount_IdInAndStatusAndCreatedAtLessThanEqualOrderByCreatedAtDesc(accountsFriend, 1, userZonedDateTime.toLocalDateTime(), pageable);
+        List<Photo> photos = photoRepository.findByAccount_IdInAndStatusAndCreatedAtLessThanEqualOrderByCreatedAtDesc(accountsFriend,
+                1,
+                convertUtcToUserLocalTime(
+                        photoFilterRequest.getTime(),
+                        photoFilterRequest.getTimezone()
+                ),
+                pageable);
         List<PhotoResponse> photoResponses = new ArrayList<>();
         for (Photo photo : photos) {
             PhotoResponse photoResponse = photoMapper.toPhotoResponse(photo);
