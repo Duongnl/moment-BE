@@ -206,7 +206,10 @@ public class AccountService {
                 account.getId()).orElseThrow(
                 () -> new AppException(FriendErrorCode.FRIEND_NOT_FOUND));
         if (friendInviteRequest.getStatus() == FriendStatus.deleted) {
-            accountRepository.deleteById(friendInviteRequest.getAccountFriendId());
+
+            friendRepository.deleteById(friend.getId());
+            friendRepository.deleteById(friendRP.getId());
+            return null;
         }
 
         if (friendInviteRequest.getStatus() == FriendStatus.blocked) {
