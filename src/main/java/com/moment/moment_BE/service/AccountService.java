@@ -98,11 +98,12 @@ public class AccountService {
     public List<AccountResponse> searchAccount(String valueSearch, int status) {
         Account accountLogin = authenticationService.getMyAccount(status);
 
+        Pageable pageable = PageRequest.of(0,5);
         List<Account> listAccount = accountRepository.findByUserNameContainingOrPhoneNumberContainingOrEmailContainingOrProfile_NameContainingAndStatus(valueSearch,
                 valueSearch,
                 valueSearch,
                 valueSearch,
-                1);
+                1,pageable);
         List<AccountResponse> responseList = new ArrayList<>();
         for (Account account : listAccount) {
             Friend friend = friendRepository.findByAccountUser_IdAndAccountFriend_Id(accountLogin.getId(), account.getId()).orElse(null);
