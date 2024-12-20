@@ -7,7 +7,7 @@ import java.time.format.DateTimeFormatter;
 
 public class DateTimeUtils {
 
-    public static LocalDateTime convertUtcToUserLocalTime(String utcTime, String userTimezone) {
+    public static LocalDateTime convertUtcToUserLocalTime(String utcTime) {
         ZonedDateTime utcZonedDateTime = ZonedDateTime.parse(utcTime, DateTimeFormatter.ISO_DATE_TIME);
 
         ZoneId userZoneId = ZoneId.of("Asia/Ho_Chi_Minh");
