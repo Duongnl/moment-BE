@@ -56,14 +56,16 @@ public class PhotoService {
         }
         accountsFriend.add(account.getId());
         Pageable pageable = PageRequest.of(photoFilterRequest.getPageCurrent(), 5);
+        LocalDateTime localDateTime =  convertUtcToUserLocalTime(
+                photoFilterRequest.getTime(),
+                photoFilterRequest.getTimezone()
+        );
+        System.out.println("Search >>>>>>> "+localDateTime);
 
         
         List<Photo> photos = photoRepository.findByAccount_IdInAndStatusAndCreatedAtLessThanEqualOrderByCreatedAtDesc(accountsFriend,
                 1,
-                convertUtcToUserLocalTime(
-                        photoFilterRequest.getTime(),
-                        photoFilterRequest.getTimezone()
-                ),
+                localDateTime,
                 pageable);
         List<PhotoResponse> photoResponses = new ArrayList<>();
         for (Photo photo : photos) {
@@ -104,10 +106,12 @@ public class PhotoService {
                 () -> new AppException(AccountErrorCode.USER_NOT_FOUND)
         );
 
+        LocalDateTime localDateTime = getCurrentTimeInSystemLocalTime();
+        System.out.println("post >>>>>>> "+localDateTime);
 
         Photo photo = photoMapper.toPhoto(postRequest);
         photo.setAccount(account);
-        photo.setCreatedAt(getCurrentTimeInSystemLocalTime());
+        photo.setCreatedAt(localDateTime);
         photo.setStatus(1);
 
         try {
