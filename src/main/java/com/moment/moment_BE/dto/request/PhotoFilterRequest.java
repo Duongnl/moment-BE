@@ -17,6 +17,4 @@ public class PhotoFilterRequest {
     int pageCurrent;
     @NotBlank(message = "NOT_BLANK")
     String time;
-    @NotBlank(message = "NOT_BLANK")
-    String timezone;
 }

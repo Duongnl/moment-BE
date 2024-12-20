@@ -57,8 +57,7 @@ public class PhotoService {
         accountsFriend.add(account.getId());
         Pageable pageable = PageRequest.of(photoFilterRequest.getPageCurrent(), 5);
         LocalDateTime localDateTime =  convertUtcToUserLocalTime(
-                photoFilterRequest.getTime(),
-                photoFilterRequest.getTimezone()
+                photoFilterRequest.getTime()
         );
         System.out.println("Search >>>>>>> "+localDateTime);
 
