@@ -63,7 +63,7 @@ public class AccountService {
         Account account = accountMapper.toAccount(request);
         Profile profile = profileMapper.toProfile(request);
 
-        account.setCreatedAt(LocalDateTime.now());
+        account.setCreatedAt(getCurrentTimeInSystemLocalTime());
         account.setStatus(1);
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         account.setPassword(passwordEncoder.encode(request.getPassword()));

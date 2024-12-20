@@ -2,6 +2,7 @@ package com.moment.moment_BE.service;
 
 
 import static com.moment.moment_BE.utils.DateTimeUtils.convertUtcToUserLocalTime;
+import static com.moment.moment_BE.utils.DateTimeUtils.getCurrentTimeInSystemLocalTime;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -106,7 +107,7 @@ public class PhotoService {
 
         Photo photo = photoMapper.toPhoto(postRequest);
         photo.setAccount(account);
-        photo.setCreatedAt(LocalDateTime.now());
+        photo.setCreatedAt(getCurrentTimeInSystemLocalTime());
         photo.setStatus(1);
 
         try {
