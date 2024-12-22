@@ -147,7 +147,6 @@ public class AccountService {
         if(friendStatus==FriendStatus.invited)
             friends = friendRepository.findByAccountUser_IdAndAccountInitiator_IdNotAndStatus(account.getId(),  account.getId(), "pending", pageable);
 
-
         List<AccountResponse> listAccountResponse = new ArrayList<>();
 
         for (Friend friend : friends) {
