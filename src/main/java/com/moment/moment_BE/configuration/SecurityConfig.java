@@ -24,10 +24,10 @@ import javax.crypto.spec.SecretKeySpec;
 @EnableMethodSecurity // phan quyen theo method
 public class SecurityConfig {
 
-   private final String[] PUBLIC_ENDPOINTS = { "/auth/token", "/auth/introspect","/account/register"};
+    private final String[] PUBLIC_ENDPOINTS = {"/auth/token", "/auth/introspect", "/account/register"};
 
     @Value("${jwt.signerKey}")
-    private  String singerKey;
+    private String singerKey;
 
     @Value("${allowed}")
     private String allowedOrigin;
@@ -36,18 +36,20 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
 //       cac request trong nay la se duoc public vi dung dang nhap
-        httpSecurity.authorizeHttpRequests(request ->
-                request.requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS)
-                        .permitAll()
-
-                        .anyRequest().authenticated());
+        httpSecurity
+                .authorizeHttpRequests(request ->
+                        request
+                                .requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS).permitAll()
+                                .requestMatchers(HttpMethod.GET, "/ws/**").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/ws/**").permitAll()
+                                .anyRequest().authenticated());
 
 //        config neu co token va token do hop le thi cho phep call api
 //        ham nay nhan token va xac thuc, nay cau hinh cho headerauthentication
 //        ham nay de cho phep nhan token, khi o front end gui token qua header Authorization thi ham cai nay se nhan duoc
         httpSecurity.oauth2ResourceServer(oauth2 ->
-                        oauth2.jwt(jwtConfigurer -> jwtConfigurer.decoder(jwtDecoder()))
-                                .authenticationEntryPoint(new JwtAuthenticationEntryPoint())
+                oauth2.jwt(jwtConfigurer -> jwtConfigurer.decoder(jwtDecoder()))
+                        .authenticationEntryPoint(new JwtAuthenticationEntryPoint())
         );
 //
 //      mac dinh  tat cau hinh nay di
@@ -60,7 +62,7 @@ public class SecurityConfig {
     //    cau hinh giai ma token, xem co hop le hay khong hop le
     @Bean
     JwtDecoder jwtDecoder() {
-        SecretKeySpec secretKeySpec = new SecretKeySpec(singerKey.getBytes(),"HS512");
+        SecretKeySpec secretKeySpec = new SecretKeySpec(singerKey.getBytes(), "HS512");
         return NimbusJwtDecoder.withSecretKey(secretKeySpec)
                 .macAlgorithm(MacAlgorithm.HS512)
                 .build();
