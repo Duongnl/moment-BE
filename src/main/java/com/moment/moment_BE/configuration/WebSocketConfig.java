@@ -14,6 +14,9 @@ public class WebSocketConfig  implements WebSocketMessageBrokerConfigurer {
 
     private final HttpHandshakeInterceptor httpHandshakeInterceptor;
 
+    @Value("${allowed}")
+    private String allowedOrigin;
+
     @Autowired
     public WebSocketConfig(HttpHandshakeInterceptor httpHandshakeInterceptor) {
         this.httpHandshakeInterceptor = httpHandshakeInterceptor;
@@ -30,7 +33,7 @@ public class WebSocketConfig  implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws")
-                .setAllowedOriginPatterns("*")
+                .setAllowedOriginPatterns(allowedOrigin)
                 .addInterceptors(httpHandshakeInterceptor)
                 .withSockJS();
 
