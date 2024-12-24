@@ -42,6 +42,11 @@ public class Noti {
     @JsonManagedReference
     private Set<NotiView> notiViews;
 
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "photo_id", referencedColumnName = "id")
+    @JsonManagedReference
+    private Photo photo;
+
 
 
 }

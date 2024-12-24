@@ -10,6 +10,7 @@ public final class Regex {
     public static final String PASSWORD = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!.@#&()–[{}]:;',?/*~$^+=<>]).{8,20}$";
     public static final String EMAIL = "^(?=.{1,64}@)[A-Za-z0-9_-]+(\\.[A-Za-z0-9_-]+)*@[^-][A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*(\\.[A-Za-z]{2,})$";
     public static final String SEX = "^(male|female|other)$";
+    public static final String NOTI_STATUS = "^(unread|all)$";
     public static final String NAME = "^(?=(.*\\p{L}){2,})[\\p{L} ]{2,255}$";
 
 
