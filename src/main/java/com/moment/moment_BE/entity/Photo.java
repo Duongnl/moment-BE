@@ -40,4 +40,8 @@ public class Photo {
     @JoinColumn(name = "account_id", nullable = false, referencedColumnName = "id")
     @JsonBackReference
     private Account account;
+
+    @OneToOne(mappedBy = "photo")
+    @JsonBackReference
+    private Noti noti;
 }

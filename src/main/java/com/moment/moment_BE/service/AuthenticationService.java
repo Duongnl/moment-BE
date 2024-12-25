@@ -41,7 +41,7 @@ public class AuthenticationService {
 
     @NonFinal// de no kh inject vao contructe cua clombok
     @Value("${jwt.signerKey}")
-     String SIGNER_KEY ;
+    String SIGNER_KEY;
 
     AccountMapper accountMapper;
     ProfileMapper profileMapper;
@@ -51,40 +51,44 @@ public class AuthenticationService {
     public IntrospectResponse introspect(IntrospectRequest request)
             throws JOSEException, ParseException {
         var token = request.getToken();
-        JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
+
+        try {
+
+            JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
 
 //        token cua  ng dung
-        SignedJWT signedJWT = SignedJWT.parse(token);
+            SignedJWT signedJWT = SignedJWT.parse(token);
 
 //        lay ra han cua token
-        Date expityTime = signedJWT.getJWTClaimsSet().getExpirationTime();
-
+            Date expityTime = signedJWT.getJWTClaimsSet().getExpirationTime();
 
 //        tra ve true hoac flase
-        var verified =  signedJWT.verify(verifier);
-        if (!verified) {
-            throw new AppException(AuthErrorCode.UNAUTHENTICATED);
-        } else {
-            //         tra ve introspectresponse
-            return IntrospectResponse.builder()
-                            .valid(true)
-                            .build();
+            var verified = signedJWT.verify(verifier);
+            if (!verified) {
+                throw new AppException(AuthErrorCode.UNAUTHENTICATED);
+            } else {
+                //         tra ve introspectresponse
+                return IntrospectResponse.builder()
+                        .valid(true)
+                        .build();
 
+            }
+        } catch (Exception e) {
+         throw new AppException(AuthErrorCode.UNAUTHENTICATED);
         }
-
-
-
     }
 
-//    login ne
-    public AuthenticationResponse authenticate(AuthenticationRequest request){
-        var user = accountRepository.findByUserNameAndStatus(request.getUserName(),1)
-                .orElseThrow(()-> new AppException(AccountErrorCode.USER_NOT_FOUND));
+    //    login ne
+    public AuthenticationResponse authenticate(AuthenticationRequest request) {
+        var user = accountRepository.findByUserNameAndStatus(request.getUserName(), 1)
+                .orElseThrow(() -> new AppException(AccountErrorCode.USER_NOT_FOUND));
 
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
 //        so sanh pass ng dung nhap vaao va pass o dataabase
-        boolean authenticated =  passwordEncoder.matches(request.getPassword(),
+        boolean authenticated = passwordEncoder.matches(request.getPassword(),
                 user.getPassword());
+
+
 //        neu dang nhap khong thanh cong
         if (!authenticated) {
             throw new AppException(AuthErrorCode.UNAUTHENTICATED);
@@ -92,16 +96,16 @@ public class AuthenticationService {
 //            dang nhap thanh cong
             var token = generateToken(user);
             return
-                            AuthenticationResponse.builder()
-                                    .token(token)
-                                    .authenticated(authenticated)
-                                    .build();
+                    AuthenticationResponse.builder()
+                            .token(token)
+                            .authenticated(authenticated)
+                            .build();
         }
     }
 
 
     //    tao token bang username
-    public String generateToken(Account account){
+    public String generateToken(Account account) {
 
 //        tao header
         JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
@@ -115,7 +119,7 @@ public class AuthenticationService {
         Payload payload = new Payload(jwtClaimsSet.toJSONObject());
 
 //        built thong tin token
-        JWSObject jwsObject = new JWSObject(header,payload);
+        JWSObject jwsObject = new JWSObject(header, payload);
 
 //      ky token
         try {
@@ -123,7 +127,7 @@ public class AuthenticationService {
             jwsObject.sign(new MACSigner(SIGNER_KEY.getBytes()));
 //            tra ve kieu string
             return jwsObject.serialize();
-        }catch (JOSEException e){
+        } catch (JOSEException e) {
 //            log.error("Cannnot create token",e);
             throw new RuntimeException(e);
         }
@@ -132,7 +136,7 @@ public class AuthenticationService {
     }
 
     // lay info
-    public UserResponse getMyInfo () {
+    public UserResponse getMyInfo() {
         var context = SecurityContextHolder.getContext();
         String name = context.getAuthentication().getName();
         Account account = accountRepository.findByUserNameAndStatus(name, 1).orElseThrow(
@@ -141,7 +145,7 @@ public class AuthenticationService {
 
         UserResponse userResponse = new UserResponse();
         userResponse = accountMapper.toUserResponse(account);
-        profileMapper.toUserResponse(userResponse,account.getProfile());
+        profileMapper.toUserResponse(userResponse, account.getProfile());
 
 //        set avatar
         String avt = null;
@@ -154,14 +158,14 @@ public class AuthenticationService {
 
         return userResponse;
     }
-    public Account getMyAccount (int status) {
+
+    public Account getMyAccount(int status) {
         var context = SecurityContextHolder.getContext();
         String name = context.getAuthentication().getName();
         return accountRepository.findByUserNameAndStatus(name, status).orElseThrow(
                 () -> new AppException(AccountErrorCode.USER_NOT_FOUND)
         );
     }
-
 
 
 }
