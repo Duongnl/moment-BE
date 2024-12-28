@@ -21,6 +21,7 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.messaging.simp.user.SimpUserRegistry;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -43,6 +44,7 @@ public class NotiService {
     NotiViewRepository notiViewRepository;
     SimpMessagingTemplate messagingTemplate;
     PhotoRepository photoRepository;
+     SimpUserRegistry userRegistry;
 
     public List<NotiResponse> getNoti(NotiFilterRequest notiFilterRequest) {
 //        lay thong tin nguoi dung dang dang nhap
@@ -157,18 +159,15 @@ public class NotiService {
             throw new AppException(NotiErrorCode.SAVE_NOTI_FAIL);
         }
 
-        List<String> accountsFriend = new ArrayList<>();
         for (Friend friend : account.getFriends()) {
             if (friend.getStatus().equals("accepted")) {
-                messagingTemplate.convertAndSendToUser(friend.getAccountFriend().getUserName(), "/topic/noti", convertNotiToNotiResponse(noti));
+                System.out.println( "userRegistry: " +  userRegistry.getUser(friend.getAccountFriend().getUserName()));
+                if (userRegistry.getUser(friend.getAccountFriend().getUserName()) != null) {
+                messagingTemplate.convertAndSendToUser(friend.getAccountFriend().getUserName(), "/queue/noti", convertNotiToNotiResponse(noti));
+                }
 
             }
         }
-
-
-
-
-
     }
 
 }

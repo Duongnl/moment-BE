@@ -1,5 +1,6 @@
 package com.moment.moment_BE.configuration;
 
+import jakarta.annotation.Nonnull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -25,7 +26,7 @@ public class WebSocketConfig  implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
-        config.enableSimpleBroker("/topic", "/user");
+        config.enableSimpleBroker("/topic", "/queue");
         config.setApplicationDestinationPrefixes("/app");
         config.setUserDestinationPrefix("/user");
     }
@@ -34,7 +35,8 @@ public class WebSocketConfig  implements WebSocketMessageBrokerConfigurer {
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws")
                 .setAllowedOriginPatterns(allowedOrigin)
-//                .addInterceptors(httpHandshakeInterceptor)
+                .setHandshakeHandler(new UserHandshakeHandler())
+                .addInterceptors(httpHandshakeInterceptor)
                 .withSockJS();
 
     }
