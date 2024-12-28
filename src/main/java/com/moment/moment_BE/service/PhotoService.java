@@ -8,6 +8,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.moment.moment_BE.exception.InValidErrorCode;
+import com.moment.moment_BE.repository.FriendRepository;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -42,6 +44,7 @@ public class PhotoService {
     PhotoMapper photoMapper;
     AccountMapper accountMapper;
     AccountRepository accountRepository;
+    FriendRepository friendRepository;
 
     // lay anh cua ban be o pageCurrent voi so luong size tu thoi gian startTime voi status
     public List<PhotoResponse> getListPhotoMyFriends(PhotoFilterRequest photoFilterRequest, int status) {
@@ -56,9 +59,16 @@ public class PhotoService {
         }
         accountsFriend.add(account.getId());
         Pageable pageable = PageRequest.of(photoFilterRequest.getPageCurrent(), 5);
-        LocalDateTime localDateTime =  convertUtcToUserLocalTime(
-                photoFilterRequest.getTime()
-        );
+
+        LocalDateTime localDateTime = null;
+        try {
+            localDateTime =  convertUtcToUserLocalTime(
+                    photoFilterRequest.getTime()
+            );
+        }catch (Exception e) {
+            throw new AppException(InValidErrorCode.TIME_ZONE_INVALID);
+        };
+
         System.out.println("Search >>>>>>> "+localDateTime);
 
         

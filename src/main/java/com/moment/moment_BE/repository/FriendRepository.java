@@ -23,4 +23,5 @@ public interface FriendRepository extends JpaRepository<Friend,Integer> {
     List<Friend> findByAccountUser_IdAndStatusNotOrAccountFriend_UserNameContainingOrAccountFriend_PhoneNumberContainingOrAccountFriend_EmailContainingOrAccountFriend_Profile_NameContaining(
             String id, String status,String userName, String phoneNumber, String email, String name);
 
+
 }

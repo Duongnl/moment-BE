@@ -14,7 +14,7 @@ public enum InValidErrorCode implements  ErrorCode{
     JSON_INVALID ("INVALID_7", "Invalid json", HttpStatus.BAD_REQUEST),
     NOT_BLANK ("INVALID_8", "Invalid blank", HttpStatus.BAD_REQUEST),
     NOT_NULL ("INVALID_9", "Invalid null", HttpStatus.BAD_REQUEST),
-
+    TIME_ZONE_INVALID("INVALID_10" , "Invalid TimeZone",HttpStatus.BAD_REQUEST)
     ;
 
     InValidErrorCode(String code, String message, HttpStatus httpStatus) {
