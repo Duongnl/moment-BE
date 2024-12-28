@@ -118,6 +118,7 @@ public class PhotoService {
             photoRepository.save(photo);
             notiService.pushNotiSocket(photo);
         } catch (Exception e) {
+            System.out.println(e.getMessage());
             throw new AppException(PhotoErrorCode.SAVE_PHOTO_FAIL);
         }
 

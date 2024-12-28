@@ -78,6 +78,40 @@ public class AuthenticationService {
         }
     }
 
+    public String getSubFromToken(String tokenReq)
+            throws JOSEException, ParseException {
+        var token = tokenReq;
+
+        try {
+
+            JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
+
+//        token cua  ng dung
+            SignedJWT signedJWT = SignedJWT.parse(token);
+
+//        lay ra han cua token
+            Date expityTime = signedJWT.getJWTClaimsSet().getExpirationTime();
+
+//        tra ve true hoac flase
+            var verified = signedJWT.verify(verifier);
+            if (!verified) {
+                throw new AppException(AuthErrorCode.UNAUTHENTICATED);
+            } else {
+                String userName = signedJWT.getJWTClaimsSet().getStringClaim("sub");
+                //         tra ve introspectresponse
+                // Kiểm tra username có tồn tại không
+                if (userName == null) {
+                    throw new AppException(AuthErrorCode.UNAUTHENTICATED);
+                }
+
+                return userName;
+
+            }
+        } catch (Exception e) {
+            throw new AppException(AuthErrorCode.UNAUTHENTICATED);
+        }
+    }
+
     //    login ne
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
         var user = accountRepository.findByUserNameAndStatus(request.getUserName(), 1)
