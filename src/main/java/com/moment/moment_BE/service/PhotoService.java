@@ -44,7 +44,7 @@ public class PhotoService {
     PhotoMapper photoMapper;
     AccountMapper accountMapper;
     AccountRepository accountRepository;
-    FriendRepository friendRepository;
+    NotiService notiService;
 
     // lay anh cua ban be o pageCurrent voi so luong size tu thoi gian startTime voi status
     public List<PhotoResponse> getListPhotoMyFriends(PhotoFilterRequest photoFilterRequest, int status) {
@@ -125,6 +125,7 @@ public class PhotoService {
 
         try {
             photoRepository.save(photo);
+            notiService.pushNotiSocket(photo);
         } catch (Exception e) {
             throw new AppException(PhotoErrorCode.SAVE_PHOTO_FAIL);
         }
