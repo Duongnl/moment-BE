@@ -8,6 +8,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.moment.moment_BE.exception.InValidErrorCode;
+import com.moment.moment_BE.repository.FriendRepository;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -57,9 +59,16 @@ public class PhotoService {
         }
         accountsFriend.add(account.getId());
         Pageable pageable = PageRequest.of(photoFilterRequest.getPageCurrent(), 5);
-        LocalDateTime localDateTime =  convertUtcToUserLocalTime(
-                photoFilterRequest.getTime()
-        );
+
+        LocalDateTime localDateTime = null;
+        try {
+            localDateTime =  convertUtcToUserLocalTime(
+                    photoFilterRequest.getTime()
+            );
+        }catch (Exception e) {
+            throw new AppException(InValidErrorCode.TIME_ZONE_INVALID);
+        };
+
         System.out.println("Search >>>>>>> "+localDateTime);
 
         
@@ -118,7 +127,6 @@ public class PhotoService {
             photoRepository.save(photo);
             notiService.pushNotiSocket(photo);
         } catch (Exception e) {
-            System.out.println(e.getMessage());
             throw new AppException(PhotoErrorCode.SAVE_PHOTO_FAIL);
         }
 
