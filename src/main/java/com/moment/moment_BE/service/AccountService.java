@@ -98,7 +98,7 @@ public class AccountService {
     public List<AccountResponse> searchAccount(String valueSearch, int status) {
         Account accountLogin = authenticationService.getMyAccount(status);
 
-        Pageable pageable = PageRequest.of(0,5);
+        Pageable pageable = PageRequest.of(0,10);
         List<Account> listAccount = accountRepository.findByUserNameContainingOrPhoneNumberContainingOrEmailContainingOrProfile_NameContainingAndStatus(valueSearch,
                 valueSearch,
                 valueSearch,
@@ -106,12 +106,11 @@ public class AccountService {
                 1,pageable);
         List<AccountResponse> responseList = new ArrayList<>();
         for (Account account : listAccount) {
-            Friend friend = friendRepository.findByAccountUser_IdAndAccountFriend_Id(accountLogin.getId(), account.getId()).orElse(null);
+            Friend friend = friendRepository.findByAccountUser_IdAndAccountFriend_IdAndStatusNot(accountLogin.getId(), account.getId(),"blocked").orElse(null);
             if (friend == null)
                 responseList.add(toAccountResponse(account, "none", null, false));
             else
                 responseList.add(toAccountResponse(account, friend.getStatus(), friend.getRequestedAt(), friend.getAccountInitiator() == accountLogin));
-
         }
         return responseList;
     }
@@ -136,15 +135,17 @@ public class AccountService {
         return accountResponse;
     }
 
-    public List<AccountResponse> getListAccountFriend(int status) {
+    public List<AccountResponse> getListAccountFriend(int status , FriendStatus friendStatus) {
         Account account = authenticationService.getMyAccount(status);
-        List<String> listStatus = new ArrayList<>();
-        listStatus.add("accepted");
-        listStatus.add("pending");
 
         Pageable pageable = PageRequest.of(0, 10);
-
-        List<Friend> friends = friendRepository.findByAccountUser_IdAndStatusIn(account.getId(), listStatus, pageable);
+        List<Friend> friends= new ArrayList<>();
+        if(friendStatus==FriendStatus.accepted)
+            friends = friendRepository.findByAccountUser_IdAndStatus(account.getId(), "accepted", pageable);
+        if(friendStatus==FriendStatus.sent)
+            friends = friendRepository.findByAccountUser_IdAndAccountInitiator_IdAndStatus(account.getId(),  account.getId(), "pending", pageable);
+        if(friendStatus==FriendStatus.invited)
+            friends = friendRepository.findByAccountUser_IdAndAccountInitiator_IdNotAndStatus(account.getId(),  account.getId(), "pending", pageable);
 
         List<AccountResponse> listAccountResponse = new ArrayList<>();
 

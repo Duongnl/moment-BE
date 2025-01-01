@@ -7,6 +7,7 @@ import com.moment.moment_BE.dto.response.ApiResponse;
 import com.moment.moment_BE.dto.response.AuthenticationResponse;
 import com.moment.moment_BE.entity.Account;
 import com.moment.moment_BE.entity.Friend;
+import com.moment.moment_BE.enums.FriendStatus;
 import com.moment.moment_BE.service.AccountService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -51,7 +52,23 @@ public class AccountController {
 
     @GetMapping("/friend")
     public ApiResponse<List<AccountResponse>> getFriends() {
-        List<AccountResponse> profileFriend = accountService.getListAccountFriend(1);
+        List<AccountResponse> profileFriend = accountService.getListAccountFriend(1, FriendStatus.accepted);
+
+        return ApiResponse.<List<AccountResponse>>builder()
+                .result(profileFriend)
+                .build();
+    }
+    @GetMapping("/friend/invited")
+    public ApiResponse<List<AccountResponse>> getFriendsInvited() {
+        List<AccountResponse> profileFriend = accountService.getListAccountFriend(1,FriendStatus.invited);
+
+        return ApiResponse.<List<AccountResponse>>builder()
+                .result(profileFriend)
+                .build();
+    }
+    @GetMapping("/friend/sent")
+    public ApiResponse<List<AccountResponse>> getFriendsSent() {
+        List<AccountResponse> profileFriend = accountService.getListAccountFriend(1,FriendStatus.sent);
 
         return ApiResponse.<List<AccountResponse>>builder()
                 .result(profileFriend)
