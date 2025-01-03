@@ -3,6 +3,7 @@ package com.moment.moment_BE.controller;
 import com.moment.moment_BE.dto.request.NotiFilterRequest;
 import com.moment.moment_BE.dto.response.ApiResponse;
 import com.moment.moment_BE.dto.response.NotiResponse;
+import com.moment.moment_BE.dto.response.NotiResult;
 import com.moment.moment_BE.service.NotiService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -68,13 +69,13 @@ public class NotiController {
     @PostMapping("/noti/get")
     public ApiResponse<List<NotiResponse>> getNoti(@RequestBody @Valid NotiFilterRequest notiFilterRequest) {
 
-
+        NotiResult notiResult = notiService.getNoti(notiFilterRequest);
 
 
         return ApiResponse.<List<NotiResponse>>builder()
-                .result(notiService.getNoti(notiFilterRequest))
+                .result(notiResult.getNotiResponseList())
                 .currentPage(notiFilterRequest.getPageCurrent())
-                .totalItems(notiService.countNoti(notiFilterRequest))
+                .totalItems(notiResult.getCountNoti())
                 .build();
     }
 
