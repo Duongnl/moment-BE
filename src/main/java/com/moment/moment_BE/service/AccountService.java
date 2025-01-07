@@ -3,6 +3,7 @@ package com.moment.moment_BE.service;
 
 import com.moment.moment_BE.dto.request.AuthenticationRequest;
 import com.moment.moment_BE.dto.request.RegisterRequest;
+import com.moment.moment_BE.dto.response.AccountResponse;
 import com.moment.moment_BE.dto.response.AuthenticationResponse;
 import com.moment.moment_BE.entity.Account;
 import com.moment.moment_BE.entity.Profile;
@@ -16,6 +17,7 @@ import com.moment.moment_BE.repository.ProfileRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -74,6 +76,29 @@ public class AccountService {
                                 .build();
 
     }
+
+    public AccountResponse getAccountInfo() {
+        // Lấy tên người dùng hiện tại từ ngữ cảnh bảo mật
+        var context = SecurityContextHolder.getContext();
+        String userName = context.getAuthentication().getName();
+
+        // Lấy thông tin Profile dựa trên userName hiện tại
+        Profile profile = profileRepository.findByUserName(userName)
+                .orElseThrow(() -> new AppException(AccountErrorCode.USER_NOT_FOUND));
+
+        // Xây dựng phản hồi AccountResponse từ Profile
+        return AccountResponse.builder()
+                .name(profile.getName())
+                .email(profile.getAccount().getEmail())
+                .userName(profile.getAccount().getUserName())
+                .birthday(profile.getBirthday())
+                .sex(profile.getSex())
+                .phoneNumber(profile.getAccount().getPhoneNumber())
+                .address(profile.getAddress())
+                .build();
+    }
+
+
 
 
 
