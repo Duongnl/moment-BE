@@ -116,7 +116,7 @@ public class PhotoService {
         );
 
         LocalDateTime localDateTime = getCurrentTimeInSystemLocalTime();
-
+        System.out.println("localDateTime post >>> " + localDateTime);
         Photo photo = photoMapper.toPhoto(postRequest);
         photo.setAccount(account);
         photo.setCreatedAt(localDateTime);
