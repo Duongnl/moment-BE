@@ -68,9 +68,6 @@ public class PhotoService {
         }catch (Exception e) {
             throw new AppException(InValidErrorCode.TIME_ZONE_INVALID);
         };
-
-        System.out.println("Search >>>>>>> "+localDateTime);
-
         
         List<Photo> photos = photoRepository.findByAccount_IdInAndStatusAndCreatedAtLessThanEqualOrderByCreatedAtDesc(accountsFriend,
                 1,

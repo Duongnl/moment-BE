@@ -1,5 +1,6 @@
 package com.moment.moment_BE.controller;
 
+import com.moment.moment_BE.dto.request.FriendFilterRequest;
 import com.moment.moment_BE.dto.request.FriendInviteRequest;
 import com.moment.moment_BE.dto.request.RegisterRequest;
 import com.moment.moment_BE.dto.response.AccountResponse;
@@ -50,25 +51,25 @@ public class AccountController {
                 .build();
     }
 
-    @GetMapping("/friend")
-    public ApiResponse<List<AccountResponse>> getFriends() {
-        List<AccountResponse> profileFriend = accountService.getListAccountFriend(1, FriendStatus.accepted);
+    @PostMapping("/friend")
+    public ApiResponse<List<AccountResponse>> getFriends(@RequestBody @Valid FriendFilterRequest friendFilterRequest) {
+        List<AccountResponse> profileFriend = accountService.getListAccountFriend(1, FriendStatus.accepted,friendFilterRequest);
 
         return ApiResponse.<List<AccountResponse>>builder()
                 .result(profileFriend)
                 .build();
     }
-    @GetMapping("/friend/invited")
-    public ApiResponse<List<AccountResponse>> getFriendsInvited() {
-        List<AccountResponse> profileFriend = accountService.getListAccountFriend(1,FriendStatus.invited);
+    @PostMapping("/friend/invited")
+    public ApiResponse<List<AccountResponse>> getFriendsInvited(@RequestBody @Valid FriendFilterRequest friendFilterRequest) {
+        List<AccountResponse> profileFriend = accountService.getListAccountFriend(1,FriendStatus.invited,friendFilterRequest);
 
         return ApiResponse.<List<AccountResponse>>builder()
                 .result(profileFriend)
                 .build();
     }
-    @GetMapping("/friend/sent")
-    public ApiResponse<List<AccountResponse>> getFriendsSent() {
-        List<AccountResponse> profileFriend = accountService.getListAccountFriend(1,FriendStatus.sent);
+    @PostMapping("/friend/sent")
+    public ApiResponse<List<AccountResponse>> getFriendsSent(@RequestBody @Valid FriendFilterRequest friendFilterRequest) {
+        List<AccountResponse> profileFriend = accountService.getListAccountFriend(1,FriendStatus.sent,friendFilterRequest);
 
         return ApiResponse.<List<AccountResponse>>builder()
                 .result(profileFriend)
