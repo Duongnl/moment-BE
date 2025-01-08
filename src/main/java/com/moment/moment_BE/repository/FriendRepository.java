@@ -4,6 +4,7 @@ import com.moment.moment_BE.entity.Friend;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,13 +14,13 @@ public interface FriendRepository extends JpaRepository<Friend, Integer> {
                         List<String> statuses,
                         Pageable pageable);
 
-        List<Friend> findByAccountUser_IdAndStatus(String accountId, String status, Pageable pageable);
+        List<Friend> findByAccountUser_IdAndStatusAndAcceptedAtLessThanEqualOrderByAcceptedAtDesc(String accountId, String status, LocalDateTime acceptedAt, Pageable pageable);
 
-        List<Friend> findByAccountUser_IdAndAccountInitiator_IdAndStatus(String accountId, String accountInitiatorId,
-                        String status, Pageable pageable);
+        List<Friend> findByAccountUser_IdAndAccountInitiator_IdAndStatusAndRequestedAtLessThanEqualOrderByRequestedAtDesc(String accountId, String accountInitiatorId,
+                        String status,LocalDateTime acceptedAt, Pageable pageable);
 
-        List<Friend> findByAccountUser_IdAndAccountInitiator_IdNotAndStatus(String accountId, String accountInitiatorId,
-                        String status, Pageable pageable);
+        List<Friend> findByAccountUser_IdAndAccountInitiator_IdNotAndStatusAndRequestedAtLessThanEqualOrderByRequestedAtDesc(String accountId, String accountInitiatorId,
+                        String status,LocalDateTime acceptedAt, Pageable pageable);
 
         Optional<Friend> findByAccountUser_IdAndAccountFriend_IdAndStatus(String AccountUser_id,
                         String AccountFriend_Id, String status);
