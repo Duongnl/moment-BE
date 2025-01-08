@@ -205,7 +205,7 @@ public class AccountService {
             friendRP.setAccountInitiator(account);
             friendRepository.save(friendRP);
 
-            notiService.pushRequestFriendSocket("pending",account,accountFriend);
+            // notiService.pushRequestFriendSocket("pending",account,accountFriend);
         }
         return toAccountResponse(friend.getAccountFriend(), friend.getStatus(), friend.getRequestedAt(), friend.getAccountInitiator() == account);
     }
@@ -237,7 +237,7 @@ public class AccountService {
         if (friendInviteRequest.getStatus() == FriendStatus.accepted) {
             friend.setStatus("accepted");
             friendRP.setStatus("accepted");
-            notiService.pushNotiRequestFriendSocket("pending",account,accountFriend);
+//            notiService.pushNotiRequestFriendSocket("pending",account,accountFriend);
         }
             if (friendInviteRequest.getStatus() == FriendStatus.pending) {
                 friend.setStatus("pending");
