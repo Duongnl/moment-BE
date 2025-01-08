@@ -65,6 +65,7 @@ public class PhotoService {
             localDateTime =  convertUtcToUserLocalTime(
                     photoFilterRequest.getTime()
             );
+            System.out.println("localDateTime request >>> " + localDateTime);
         }catch (Exception e) {
             throw new AppException(InValidErrorCode.TIME_ZONE_INVALID);
         };
