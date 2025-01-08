@@ -51,7 +51,9 @@ public class PhotoController {
 
         photoService.post(postRequest);
         System.out.println("post >>>>>>> "+getCurrentTimeInSystemLocalTime());
-        return ApiResponse.builder().build();
+        return ApiResponse.<String>builder()
+                .result(getCurrentTimeInSystemLocalTime()+"")
+                .build();
     }
 
 
