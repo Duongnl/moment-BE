@@ -1,12 +1,15 @@
 package com.moment.moment_BE.service;
 
 
+import static com.moment.moment_BE.utils.DateTimeUtils.convertUtcToUserLocalTime;
 import static com.moment.moment_BE.utils.DateTimeUtils.getCurrentTimeInSystemLocalTime;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.moment.moment_BE.dto.request.FriendFilterRequest;
+import com.moment.moment_BE.exception.InValidErrorCode;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -48,6 +51,7 @@ public class AccountService {
     ProfileRepository profileRepository;
     PhotoService photoService;
     FriendRepository friendRepository;
+    private final NotiService notiService;
 
     public List<Account> getAll() {
         return accountRepository.findAll();
@@ -98,7 +102,7 @@ public class AccountService {
     public List<AccountResponse> searchAccount(String valueSearch, int status) {
         Account accountLogin = authenticationService.getMyAccount(status);
 
-        Pageable pageable = PageRequest.of(0,10);
+        Pageable pageable = PageRequest.of(0,5);
         List<Account> listAccount = accountRepository.findByUserNameContainingOrPhoneNumberContainingOrEmailContainingOrProfile_NameContainingAndStatus(valueSearch,
                 valueSearch,
                 valueSearch,
@@ -135,17 +139,28 @@ public class AccountService {
         return accountResponse;
     }
 
-    public List<AccountResponse> getListAccountFriend(int status , FriendStatus friendStatus) {
+    public List<AccountResponse> getListAccountFriend(int status , FriendStatus friendStatus, FriendFilterRequest friendFilterRequest) {
         Account account = authenticationService.getMyAccount(status);
 
-        Pageable pageable = PageRequest.of(0, 10);
+        LocalDateTime acceptedAt = null;
+        try {
+            acceptedAt =  convertUtcToUserLocalTime(
+                    friendFilterRequest.getTime()
+            );
+        }catch (Exception e) {
+            throw new AppException(InValidErrorCode.TIME_ZONE_INVALID);
+        };
+
+        Pageable pageable = PageRequest.of(friendFilterRequest.getPageCurrent(), 10);
         List<Friend> friends= new ArrayList<>();
-        if(friendStatus==FriendStatus.accepted)
-            friends = friendRepository.findByAccountUser_IdAndStatus(account.getId(), "accepted", pageable);
+        if(friendStatus==FriendStatus.accepted){
+
+            friends = friendRepository.findByAccountUser_IdAndStatusAndAcceptedAtLessThanEqualOrderByAcceptedAtDesc(account.getId(), "accepted", acceptedAt ,pageable);
+        }
         if(friendStatus==FriendStatus.sent)
-            friends = friendRepository.findByAccountUser_IdAndAccountInitiator_IdAndStatus(account.getId(),  account.getId(), "pending", pageable);
+            friends = friendRepository.findByAccountUser_IdAndAccountInitiator_IdAndStatusAndRequestedAtLessThanEqualOrderByRequestedAtDesc(account.getId(),  account.getId(), "pending",acceptedAt, pageable);
         if(friendStatus==FriendStatus.invited)
-            friends = friendRepository.findByAccountUser_IdAndAccountInitiator_IdNotAndStatus(account.getId(),  account.getId(), "pending", pageable);
+            friends = friendRepository.findByAccountUser_IdAndAccountInitiator_IdNotAndStatusAndRequestedAtLessThanEqualOrderByRequestedAtDesc(account.getId(),  account.getId(), "pending", acceptedAt,pageable);
 
         List<AccountResponse> listAccountResponse = new ArrayList<>();
 
@@ -189,6 +204,8 @@ public class AccountService {
             friendRP.setStatus("pending");
             friendRP.setAccountInitiator(account);
             friendRepository.save(friendRP);
+
+            notiService.pushRequestFriendSocket("pending",account,accountFriend);
         }
         return toAccountResponse(friend.getAccountFriend(), friend.getStatus(), friend.getRequestedAt(), friend.getAccountInitiator() == account);
     }
@@ -220,6 +237,7 @@ public class AccountService {
         if (friendInviteRequest.getStatus() == FriendStatus.accepted) {
             friend.setStatus("accepted");
             friendRP.setStatus("accepted");
+            notiService.pushNotiRequestFriendSocket("pending",account,accountFriend);
         }
             if (friendInviteRequest.getStatus() == FriendStatus.pending) {
                 friend.setStatus("pending");
