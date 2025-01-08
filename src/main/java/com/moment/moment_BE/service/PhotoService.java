@@ -32,6 +32,7 @@ import com.moment.moment_BE.repository.PhotoRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 // kh khai bao gi het thi no autowired va private
@@ -106,6 +107,7 @@ public class PhotoService {
         return photoRepository.findByAccount_IdInAndStatusAndCreatedAtLessThanEqualOrderByCreatedAtDesc(accountsFriend, status, startTime, pageable);
     }
 
+    @Transactional
     public void post(PostRequest postRequest) {
         var context = SecurityContextHolder.getContext();
         String name = context.getAuthentication().getName();
@@ -114,7 +116,6 @@ public class PhotoService {
         );
 
         LocalDateTime localDateTime = getCurrentTimeInSystemLocalTime();
-        System.out.println("post >>>>>>> "+localDateTime);
 
         Photo photo = photoMapper.toPhoto(postRequest);
         photo.setAccount(account);

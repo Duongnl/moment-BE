@@ -7,9 +7,8 @@ import static com.moment.moment_BE.utils.DateTimeUtils.getCurrentTimeInSystemLoc
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
-import com.moment.moment_BE.dto.request.FriendFilterRequest;
-import com.moment.moment_BE.exception.InValidErrorCode;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -17,6 +16,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.moment.moment_BE.dto.request.FriendFilterRequest;
 import com.moment.moment_BE.dto.request.FriendInviteRequest;
 import com.moment.moment_BE.dto.request.RegisterRequest;
 import com.moment.moment_BE.dto.response.AccountResponse;
@@ -28,6 +28,7 @@ import com.moment.moment_BE.enums.FriendStatus;
 import com.moment.moment_BE.exception.AccountErrorCode;
 import com.moment.moment_BE.exception.AppException;
 import com.moment.moment_BE.exception.FriendErrorCode;
+import com.moment.moment_BE.exception.InValidErrorCode;
 import com.moment.moment_BE.mapper.AccountMapper;
 import com.moment.moment_BE.mapper.ProfileMapper;
 import com.moment.moment_BE.repository.AccountRepository;
@@ -51,7 +52,6 @@ public class AccountService {
     ProfileRepository profileRepository;
     PhotoService photoService;
     FriendRepository friendRepository;
-    private final NotiService notiService;
 
     public List<Account> getAll() {
         return accountRepository.findAll();
@@ -223,29 +223,44 @@ public class AccountService {
                 accountFriend.getId(),
                 account.getId()).orElseThrow(
                 () -> new AppException(FriendErrorCode.FRIEND_NOT_FOUND));
-        if (friendInviteRequest.getStatus() == FriendStatus.deleted) {
 
-            friendRepository.deleteById(friend.getId());
-            friendRepository.deleteById(friendRP.getId());
-            return null;
+        switch (friendInviteRequest.getStatus()) {
+            // chi xet truong hop chua chap nhan
+            case accepted :
+                if(Objects.equals(friend.getStatus(),"accepted") && Objects.equals(friendRP.getStatus(),"accepted")) {
+                    throw new AppException(FriendErrorCode.FRIEND_ACCEPTED);
+                }
+                else {
+                    if(Objects.equals(friend.getStatus(), "pending") && Objects.equals(friendRP.getStatus(), "pending")){
+                        friend.setStatus("accepted");
+                        friendRP.setStatus("accepted");
+                        friend.setAcceptedAt(getCurrentTimeInSystemLocalTime());
+                        friendRP.setAcceptedAt(getCurrentTimeInSystemLocalTime());
+                    }
+                }
+                break;
+
+            case blocked :
+                if(Objects.equals(friend.getStatus(), "blocked") && Objects.equals(friendRP.getStatus(), "blocked")){
+                    throw new AppException(FriendErrorCode.FRIEND_BLOCKED);
+                }
+                else {
+                    friend.setStatus("blocked");
+                    friendRP.setStatus("blocked");
+                }
+                break;
+
+            case deleted:
+                if(Objects.equals(friend.getStatus(), "pending") && Objects.equals(friendRP.getStatus(), "pending")){
+                    friendRepository.deleteById(friend.getId());
+                    friendRepository.deleteById(friendRP.getId());
+                    return null;
+                }
+                break;
+            default: throw new AppException(FriendErrorCode.FRIEND_ERROR);
         }
 
-        if (friendInviteRequest.getStatus() == FriendStatus.blocked) {
-            friend.setStatus("blocked");
-            friendRP.setStatus("blocked");
-        }
-        if (friendInviteRequest.getStatus() == FriendStatus.accepted) {
-            friend.setStatus("accepted");
-            friendRP.setStatus("accepted");
-//            notiService.pushNotiRequestFriendSocket("pending",account,accountFriend);
-        }
-            if (friendInviteRequest.getStatus() == FriendStatus.pending) {
-                friend.setStatus("pending");
-                friendRP.setStatus("pending");
-            }
 
-        friend.setAcceptedAt(getCurrentTimeInSystemLocalTime());
-        friendRP.setAcceptedAt(getCurrentTimeInSystemLocalTime());
         friendRepository.save(friend);
         friendRepository.save(friendRP);
         return toAccountResponse(friend.getAccountFriend(), friend.getStatus(), friend.getRequestedAt(), friend.getAccountInitiator() == account);

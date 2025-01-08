@@ -18,6 +18,9 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
+import static com.moment.moment_BE.utils.DateTimeUtils.convertUtcToUserLocalTime;
+import static com.moment.moment_BE.utils.DateTimeUtils.getCurrentTimeInSystemLocalTime;
+
 @RestController
 @RequestMapping("/photo")
 @RequiredArgsConstructor
@@ -32,6 +35,11 @@ public class PhotoController {
         List<PhotoResponse> photos = photoService.getListPhotoMyFriends(
                 photoFilterRequest, 1
         );
+        System.out.println("get >>>>>>> "+convertUtcToUserLocalTime(
+                photoFilterRequest.getTime()
+        ));
+        System.out.println("get time server >>>>>>> "+getCurrentTimeInSystemLocalTime());
+
         return ApiResponse.<List<PhotoResponse>>builder()
                 .result(photos)
                 .currentPage(photoFilterRequest.getPageCurrent())
@@ -42,7 +50,7 @@ public class PhotoController {
     public ApiResponse<?> post(@RequestBody @Valid PostRequest postRequest) {
 
         photoService.post(postRequest);
-
+        System.out.println("post >>>>>>> "+getCurrentTimeInSystemLocalTime());
         return ApiResponse.builder().build();
     }
 
