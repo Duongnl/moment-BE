@@ -1,16 +1,15 @@
-package com.moment.moment_BE.entity;
+package com.moment.moment_BE.dto.request;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
 import lombok.*;
 
 import java.time.LocalDate;
 
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
-public class AccountInfo {
+public class AccountInfoRequest {
     private String name;
     private String email;
     private String userName;

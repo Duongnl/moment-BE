@@ -1,15 +1,14 @@
 package com.moment.moment_BE.service;
 
 
-import com.moment.moment_BE.dto.request.AuthenticationRequest;
 import com.moment.moment_BE.dto.request.RegisterRequest;
 import com.moment.moment_BE.dto.response.AccountResponse;
 import com.moment.moment_BE.dto.response.AuthenticationResponse;
 import com.moment.moment_BE.entity.Account;
+import com.moment.moment_BE.dto.request.AccountInfoRequest;
 import com.moment.moment_BE.entity.Profile;
 import com.moment.moment_BE.exception.AccountErrorCode;
 import com.moment.moment_BE.exception.AppException;
-import com.moment.moment_BE.exception.AuthErrorCode;
 import com.moment.moment_BE.mapper.AccountMapper;
 import com.moment.moment_BE.mapper.ProfileMapper;
 import com.moment.moment_BE.repository.AccountRepository;
@@ -96,6 +95,21 @@ public class AccountService {
                 .phoneNumber(profile.getAccount().getPhoneNumber())
                 .address(profile.getAddress())
                 .build();
+    }
+
+    public void updateAccountInfo(String userName, AccountInfoRequest updateRequest) {
+        // Kiểm tra sự tồn tại của Profile
+        Profile profile = profileRepository.findByUserName(userName)
+                .orElseThrow(() -> new AppException(AccountErrorCode.USER_NOT_FOUND));
+
+        // Cập nhật thông tin Profile
+        profileRepository.updateProfileByUserName(
+                updateRequest.getName(),
+                updateRequest.getBirthday(),
+                updateRequest.getSex(),
+                updateRequest.getAddress(),
+                userName
+        );
     }
 
 

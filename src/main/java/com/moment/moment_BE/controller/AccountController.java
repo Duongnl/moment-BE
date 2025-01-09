@@ -5,13 +5,14 @@ import com.moment.moment_BE.dto.response.AccountResponse;
 import com.moment.moment_BE.dto.response.ApiResponse;
 import com.moment.moment_BE.dto.response.AuthenticationResponse;
 import com.moment.moment_BE.entity.Account;
-import com.moment.moment_BE.entity.AccountInfo;
+import com.moment.moment_BE.dto.request.AccountInfoRequest;
 import com.moment.moment_BE.entity.Friend;
 import com.moment.moment_BE.service.AccountService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -52,14 +53,27 @@ public class AccountController {
     }
 
     @GetMapping("/setting")
-    public ResponseEntity<AccountResponse> getAccountInfo() {
+    public ApiResponse<AccountResponse> getAccountInfo() {
         // Lấy thông tin tài khoản của người dùng hiện tại từ service
         AccountResponse accountResponse = accountService.getAccountInfo();
 
-        // Trả về thông tin tài khoản dưới dạng response
-        return ResponseEntity.ok(accountResponse);
+        // Trả về thông tin tài khoản dưới dạng ApiResponse
+        return ApiResponse.<AccountResponse>builder()
+                .result(accountResponse)
+                .build();
     }
 
 
-
+    @PutMapping("/setting")
+    public ApiResponse<Void> updateAccountInfo(@RequestBody AccountInfoRequest updateRequest) {
+        // Lấy tên người dùng hiện tại từ ngữ cảnh bảo mật
+        var context = SecurityContextHolder.getContext();
+        String userName = context.getAuthentication().getName();
+        // Cập nhật thông tin tài khoản
+        accountService.updateAccountInfo(userName, updateRequest);
+        // Trả về phản hồi thành công
+        return ApiResponse.<Void>builder()
+                .message("Account information updated successfully.")
+                .build();
+    }
 }
