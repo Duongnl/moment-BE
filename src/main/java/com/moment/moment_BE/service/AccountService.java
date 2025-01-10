@@ -112,6 +112,16 @@ public class AccountService {
         );
     }
 
+    public void changUserName(String currentUserName, String newUserName) {
+        if (accountRepository.existsByUserName(newUserName)) {
+            throw new AppException(AccountErrorCode.USER_NAME_EXISTED);
+        }
+        Account account = accountRepository.findByUserNameAndStatus(currentUserName, 1)
+                .orElseThrow(() -> new AppException(AccountErrorCode.USER_NOT_FOUND));
+        account.setUserName(newUserName);
+        accountRepository.save(account);
+    }
+
 
 
 

@@ -56,7 +56,6 @@ public class AccountController {
     public ApiResponse<AccountResponse> getAccountInfo() {
         // Lấy thông tin tài khoản của người dùng hiện tại từ service
         AccountResponse accountResponse = accountService.getAccountInfo();
-
         // Trả về thông tin tài khoản dưới dạng ApiResponse
         return ApiResponse.<AccountResponse>builder()
                 .result(accountResponse)
@@ -75,5 +74,14 @@ public class AccountController {
         return ApiResponse.<Void>builder()
                 .message("Account information updated successfully.")
                 .build();
+    }
+
+    @PutMapping("change-username")
+    public ApiResponse<Void> changeUserName(@RequestBody AccountInfoRequest updateRequest) {
+        var context = SecurityContextHolder.getContext();
+        String userName = context.getAuthentication().getName();
+        accountService.changUserName(userName, updateRequest.getUserName());
+        return ApiResponse.<Void>builder()
+                .message("UserName updated successfully.").build();
     }
 }
