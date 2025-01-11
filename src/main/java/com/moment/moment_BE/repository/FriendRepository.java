@@ -3,6 +3,8 @@ package com.moment.moment_BE.repository;
 import com.moment.moment_BE.entity.Friend;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -30,8 +32,27 @@ public interface FriendRepository extends JpaRepository<Friend, Integer> {
 
         Optional<Friend> findByAccountUser_IdAndAccountFriend_Id(String AccountUser_id, String AccountFriend_Id);
 
-        List<Friend> findByAccountUser_IdAndStatusNotOrAccountFriend_UserNameContainingOrAccountFriend_PhoneNumberContainingOrAccountFriend_EmailContainingOrAccountFriend_Profile_NameContaining(
-                        String id, String status, String userName, String phoneNumber, String email, String name);
+        List<Friend> findByAccountUser_IdAndAccountFriend_IdInAndStatusNot(String accountUserId,List<String> accountFriendIds,String status);
 
+        @Query("SELECT COUNT(f) FROM  Friend f " +
+                "WHERE f.accountUser.id IN :accountUserId " +
+                "AND f.accountInitiator.id IN :accountUserId " +
+                "AND f.status IN :status "
+        )
+        int countFriendSent (@Param("accountUserId") String accountUserId,
+                         @Param("status") String status);
+        @Query("SELECT COUNT(f) FROM  Friend f " +
+                "WHERE f.accountUser.id IN :accountUserId " +
+                "AND f.accountInitiator.id NOT IN :accountUserId " +
+                "AND f.status IN :status "
+        )
+        int countFriendInvited (@Param("accountUserId") String accountUserId,
+                         @Param("status") String status);
 
+        @Query("SELECT COUNT(f) FROM  Friend f " +
+                "WHERE f.accountUser.id IN :accountUserId " +
+                "AND f.status IN :status "
+        )
+        int countFriend (@Param("accountUserId") String accountUserId,
+                                @Param("status") String status);
 }
