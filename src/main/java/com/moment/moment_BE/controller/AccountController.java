@@ -1,5 +1,6 @@
 package com.moment.moment_BE.controller;
 
+import com.moment.moment_BE.dto.request.ChangePasswordRequest;
 import com.moment.moment_BE.dto.request.RegisterRequest;
 import com.moment.moment_BE.dto.response.AccountResponse;
 import com.moment.moment_BE.dto.response.ApiResponse;
@@ -84,4 +85,20 @@ public class AccountController {
         return ApiResponse.<Void>builder()
                 .message("UserName updated successfully.").build();
     }
+
+    @PutMapping("/change-password")
+    public ApiResponse<Void> changePassword(@RequestBody ChangePasswordRequest request) {
+        // Lấy tên người dùng hiện tại từ ngữ cảnh bảo mật
+        var context = SecurityContextHolder.getContext();
+        String userName = context.getAuthentication().getName();
+
+        // Gọi hàm thay đổi mật khẩu trong service
+        accountService.changePassword(userName, request);
+
+        // Trả về phản hồi thành công
+        return ApiResponse.<Void>builder()
+                .message("Password changed successfully.")
+                .build();
+    }
+
 }

@@ -1,6 +1,7 @@
 package com.moment.moment_BE.service;
 
 
+import com.moment.moment_BE.dto.request.ChangePasswordRequest;
 import com.moment.moment_BE.dto.request.RegisterRequest;
 import com.moment.moment_BE.dto.response.AccountResponse;
 import com.moment.moment_BE.dto.response.AuthenticationResponse;
@@ -121,6 +122,34 @@ public class AccountService {
         account.setUserName(newUserName);
         accountRepository.save(account);
     }
+
+    public void changePassword(String userName, ChangePasswordRequest request) {
+        // Tìm tài khoản dựa trên tên người dùng
+        Account account = accountRepository.findByUserNameAndStatus(userName, 1)
+                .orElseThrow(() -> new AppException(AccountErrorCode.USER_NOT_FOUND));
+
+        // Kiểm tra mật khẩu cũ
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
+        if (!passwordEncoder.matches(request.getOldPassword(), account.getPassword())) {
+            throw new AppException(AccountErrorCode.OLD_PASSWORD_INCORRECT);
+        }
+
+        // Kiểm tra nếu mật khẩu cũ và mật khẩu mới giống nhau
+        if (request.getOldPassword().equals(request.getNewPassword())) {
+            throw new AppException(AccountErrorCode.NEW_PASSWORD_SAME_AS_OLD);
+        }
+
+        // Cập nhật mật khẩu mới
+        account.setPassword(passwordEncoder.encode(request.getNewPassword()));
+
+        // Lưu tài khoản vào cơ sở dữ liệu
+        try {
+            accountRepository.save(account);
+        } catch (Exception e) {
+            throw new AppException(AccountErrorCode.SAVE_PASSWORD_FAIL);
+        }
+    }
+
 
 
 
