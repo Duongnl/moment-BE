@@ -2,12 +2,15 @@ package com.moment.moment_BE.controller;
 
 import com.moment.moment_BE.dto.request.FriendFilterRequest;
 import com.moment.moment_BE.dto.request.FriendInviteRequest;
+import com.moment.moment_BE.dto.request.ChangePasswordRequest;
 import com.moment.moment_BE.dto.request.RegisterRequest;
 import com.moment.moment_BE.dto.response.AccountResponse;
 import com.moment.moment_BE.dto.response.AccountResult;
+import com.moment.moment_BE.dto.response.AccountSettingResponse;
 import com.moment.moment_BE.dto.response.ApiResponse;
 import com.moment.moment_BE.dto.response.AuthenticationResponse;
 import com.moment.moment_BE.entity.Account;
+import com.moment.moment_BE.dto.request.AccountInfoRequest;
 import com.moment.moment_BE.entity.Friend;
 import com.moment.moment_BE.enums.FriendStatus;
 import com.moment.moment_BE.service.AccountService;
@@ -15,6 +18,9 @@ import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -105,5 +111,52 @@ public class AccountController {
         return ApiResponse.builder().result(friendResponse).build();
     }
 
+    @GetMapping("/setting")
+    public ApiResponse<AccountSettingResponse> getAccountInfo() {
+        // Lấy thông tin tài khoản của người dùng hiện tại từ service
+        AccountSettingResponse accountResponse = accountService.getAccountInfo();
+        // Trả về thông tin tài khoản dưới dạng ApiResponse
+        return ApiResponse.<AccountSettingResponse>builder()
+                .result(accountResponse)
+                .build();
+    }
+
+
+    @PutMapping("/setting")
+    public ApiResponse<Void> updateAccountInfo(@RequestBody AccountInfoRequest updateRequest) {
+        // Lấy tên người dùng hiện tại từ ngữ cảnh bảo mật
+        var context = SecurityContextHolder.getContext();
+        String userName = context.getAuthentication().getName();
+        // Cập nhật thông tin tài khoản
+        accountService.updateAccountInfo(userName, updateRequest);
+        // Trả về phản hồi thành công
+        return ApiResponse.<Void>builder()
+                .message("Account information updated successfully.")
+                .build();
+    }
+
+    @PutMapping("change-username")
+    public ApiResponse<Void> changeUserName(@RequestBody AccountInfoRequest updateRequest) {
+        var context = SecurityContextHolder.getContext();
+        String userName = context.getAuthentication().getName();
+        accountService.changUserName(userName, updateRequest.getUserName());
+        return ApiResponse.<Void>builder()
+                .message("UserName updated successfully.").build();
+    }
+
+    @PutMapping("/change-password")
+    public ApiResponse<Void> changePassword(@RequestBody ChangePasswordRequest request) {
+        // Lấy tên người dùng hiện tại từ ngữ cảnh bảo mật
+        var context = SecurityContextHolder.getContext();
+        String userName = context.getAuthentication().getName();
+
+        // Gọi hàm thay đổi mật khẩu trong service
+        accountService.changePassword(userName, request);
+
+        // Trả về phản hồi thành công
+        return ApiResponse.<Void>builder()
+                .message("Password changed successfully.")
+                .build();
+    }
 
 }
