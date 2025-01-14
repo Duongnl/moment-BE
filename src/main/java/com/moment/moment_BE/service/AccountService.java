@@ -125,16 +125,21 @@ public class AccountService {
         // Xây dựng response list
         List<AccountResponse> responseList = new ArrayList<>();
         for (Account account : listAccount) {
-            Friend friend = friendMap.get(account.getId());
-            if (friend == null) {
-                responseList.add(toAccountResponse(account, "none", null, false));
-            } else {
-                responseList.add(toAccountResponse(
-                        account,
-                        friend.getStatus(),
-                        friend.getRequestedAt(),
-                        friend.getAccountInitiator() == accountLogin
-                ));
+            if(account==accountLogin) {
+                responseList.add(toAccountResponse(account, "me", null, false));
+            }else {
+                Friend friend = friendMap.get(account.getId());
+                if (friend == null) {
+                    responseList.add(toAccountResponse(account, "none", null, false));
+                } else {
+                    responseList.add(toAccountResponse(
+                            account,
+                            friend.getStatus(),
+                            friend.getRequestedAt(),
+                            friend.getAccountInitiator() == accountLogin
+                    ));
+                }
+
             }
         }
 
@@ -188,6 +193,7 @@ public class AccountService {
 
     private FriendStatus determineFriendStatus(String status, boolean isInitiator) {
         return switch (status) {
+            case "me"-> FriendStatus.me;
             case "accepted" -> FriendStatus.accepted;
             case "pending" -> isInitiator ? FriendStatus.sent : FriendStatus.invited;
             default -> FriendStatus.none;

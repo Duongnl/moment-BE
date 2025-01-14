@@ -58,7 +58,7 @@ public class AccountController {
 
         return ApiResponse.<List<AccountResponse>>builder()
                 .result(accountResult.getAccountResponseList())
-                .totalPages(accountResult.getCountAccountFriend())
+                .totalItems(accountResult.getCountAccountFriend())
                 .build();
     }
     @PostMapping("/friend/invited")
@@ -67,7 +67,7 @@ public class AccountController {
 
         return ApiResponse.<List<AccountResponse>>builder()
                 .result(accountResult.getAccountResponseList())
-                .totalPages(accountResult.getCountAccountFriend())
+                .totalItems(accountResult.getCountAccountFriend())
                 .build();
     }
     @PostMapping("/friend/sent")
