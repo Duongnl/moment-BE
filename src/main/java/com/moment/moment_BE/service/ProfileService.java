@@ -63,7 +63,6 @@ public class ProfileService {
 
 
 
-
         Profile pro =  profileRepository.findByAccount_UserName(profileFilterRequest.getUserName());
         if (pro == null) {
             throw new AppException(AccountErrorCode.USER_NOT_FOUND);
@@ -96,7 +95,6 @@ public class ProfileService {
                 1,
                 localDateTime,
                 pageable);
-
         List<PhotoResponse> photoResponses = new ArrayList<>();
 
         for (Photo photo : photos ) {
@@ -110,10 +108,7 @@ public class ProfileService {
 
         }
 
-
         profileResponse.setUrlAvt(photoService.getUrlAvtAccount(pro.getAccount().getId()));
-
-
 
         return profileResponse;
     }

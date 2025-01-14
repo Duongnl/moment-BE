@@ -18,5 +18,4 @@ public class ProfileResponse {
     List<PhotoResponse> listPhotoProfile;
     String urlAvt;
     int quantityFriend;
-
 }
