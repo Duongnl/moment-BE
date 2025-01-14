@@ -3,7 +3,6 @@ package com.moment.moment_BE.dto.response;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
@@ -11,18 +10,13 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class UserResponse {
-
-//    Tra ve thong tin ca nhan
-
-    String id;
-    String userName;
-    String email;
-    String phoneNumber;
-    LocalDateTime createdAt;
+public class NotiResponse {
+    int id;
     String name;
-    LocalDate birthday;
-    String address;
+    String userName;
+    String message;
+    LocalDateTime createdAt;
+    String urlAvt;
     String urlPhoto;
-    int status;
+    String status;
 }

@@ -1,13 +1,18 @@
 package com.moment.moment_BE.controller;
 
+import com.moment.moment_BE.dto.request.FriendFilterRequest;
+import com.moment.moment_BE.dto.request.FriendInviteRequest;
 import com.moment.moment_BE.dto.request.ChangePasswordRequest;
 import com.moment.moment_BE.dto.request.RegisterRequest;
 import com.moment.moment_BE.dto.response.AccountResponse;
+import com.moment.moment_BE.dto.response.AccountResult;
+import com.moment.moment_BE.dto.response.AccountSettingResponse;
 import com.moment.moment_BE.dto.response.ApiResponse;
 import com.moment.moment_BE.dto.response.AuthenticationResponse;
 import com.moment.moment_BE.entity.Account;
 import com.moment.moment_BE.dto.request.AccountInfoRequest;
 import com.moment.moment_BE.entity.Friend;
+import com.moment.moment_BE.enums.FriendStatus;
 import com.moment.moment_BE.service.AccountService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -53,12 +58,65 @@ public class AccountController {
                 .build();
     }
 
+    @PostMapping("/friend")
+    public ApiResponse<List<AccountResponse>> getFriends(@RequestBody @Valid FriendFilterRequest friendFilterRequest) {
+        AccountResult accountResult = accountService.getListAccountFriend(1, FriendStatus.accepted,friendFilterRequest);
+
+        return ApiResponse.<List<AccountResponse>>builder()
+                .result(accountResult.getAccountResponseList())
+                .totalItems(accountResult.getCountAccountFriend())
+                .build();
+    }
+    @PostMapping("/friend/invited")
+    public ApiResponse<List<AccountResponse>> getFriendsInvited(@RequestBody @Valid FriendFilterRequest friendFilterRequest) {
+        AccountResult accountResult = accountService.getListAccountFriend(1,FriendStatus.invited,friendFilterRequest);
+
+        return ApiResponse.<List<AccountResponse>>builder()
+                .result(accountResult.getAccountResponseList())
+                .totalItems(accountResult.getCountAccountFriend())
+                .build();
+    }
+    @PostMapping("/friend/sent")
+    public ApiResponse<List<AccountResponse>> getFriendsSent(@RequestBody @Valid FriendFilterRequest friendFilterRequest) {
+        AccountResult accountResult = accountService.getListAccountFriend(1,FriendStatus.sent,friendFilterRequest);
+
+        return ApiResponse.<List<AccountResponse>>builder()
+                .result(accountResult.getAccountResponseList())
+                .totalItems(accountResult.getCountAccountFriend())
+                .build();
+    }
+
+    @PostMapping("/friend/add")
+    public ApiResponse<?> addFriend(@RequestBody @Valid FriendInviteRequest friendInviteRequest) {
+
+       AccountResponse friendResponse=accountService.addFriend(friendInviteRequest,1);
+
+        return ApiResponse.builder().result(friendResponse).build();
+    }
+
+
+    @PostMapping("friend/status")
+    public ApiResponse<?> changeFriendStatus(@RequestBody @Valid FriendInviteRequest friendInviteRequest) {
+
+        AccountResponse friendResponse =accountService.changeStatusFriend(friendInviteRequest,1);
+
+        return ApiResponse.builder().result(friendResponse).build();
+    }
+
+    @GetMapping("/search")
+    public ApiResponse<?> searchFriend( @RequestParam String s) {
+
+        List<AccountResponse> friendResponse=accountService.searchAccount(s,1);
+
+        return ApiResponse.builder().result(friendResponse).build();
+    }
+
     @GetMapping("/setting")
-    public ApiResponse<AccountResponse> getAccountInfo() {
+    public ApiResponse<AccountSettingResponse> getAccountInfo() {
         // Lấy thông tin tài khoản của người dùng hiện tại từ service
-        AccountResponse accountResponse = accountService.getAccountInfo();
+        AccountSettingResponse accountResponse = accountService.getAccountInfo();
         // Trả về thông tin tài khoản dưới dạng ApiResponse
-        return ApiResponse.<AccountResponse>builder()
+        return ApiResponse.<AccountSettingResponse>builder()
                 .result(accountResponse)
                 .build();
     }

@@ -1,35 +1,38 @@
 package com.moment.moment_BE.service;
 
 
+import static com.moment.moment_BE.utils.DateTimeUtils.convertUtcToUserLocalTime;
+import static com.moment.moment_BE.utils.DateTimeUtils.getCurrentTimeInSystemLocalTime;
+
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.moment.moment_BE.dto.request.PostRequest;
-import com.moment.moment_BE.exception.AccountErrorCode;
-import com.moment.moment_BE.exception.AppException;
-import com.moment.moment_BE.exception.PhotoErrorCode;
-import com.moment.moment_BE.repository.AccountRepository;
+import com.moment.moment_BE.exception.InValidErrorCode;
+import com.moment.moment_BE.repository.FriendRepository;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.moment.moment_BE.dto.request.PhotoFilterRequest;
+import com.moment.moment_BE.dto.request.PostRequest;
 import com.moment.moment_BE.dto.response.PhotoResponse;
 import com.moment.moment_BE.entity.Account;
 import com.moment.moment_BE.entity.Friend;
 import com.moment.moment_BE.entity.Photo;
+import com.moment.moment_BE.exception.AccountErrorCode;
+import com.moment.moment_BE.exception.AppException;
+import com.moment.moment_BE.exception.PhotoErrorCode;
 import com.moment.moment_BE.mapper.AccountMapper;
 import com.moment.moment_BE.mapper.PhotoMapper;
+import com.moment.moment_BE.repository.AccountRepository;
 import com.moment.moment_BE.repository.PhotoRepository;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 // kh khai bao gi het thi no autowired va private
@@ -42,6 +45,7 @@ public class PhotoService {
     PhotoMapper photoMapper;
     AccountMapper accountMapper;
     AccountRepository accountRepository;
+    NotiService notiService;
 
     // lay anh cua ban be o pageCurrent voi so luong size tu thoi gian startTime voi status
     public List<PhotoResponse> getListPhotoMyFriends(PhotoFilterRequest photoFilterRequest, int status) {
@@ -57,14 +61,20 @@ public class PhotoService {
         accountsFriend.add(account.getId());
         Pageable pageable = PageRequest.of(photoFilterRequest.getPageCurrent(), 5);
 
-
-        ZonedDateTime utcZonedDateTime = ZonedDateTime.parse(photoFilterRequest.getTime(), DateTimeFormatter.ISO_DATE_TIME);
-
-        // Bước 2: Chuyển đổi từ UTC sang múi giờ người dùng
-        ZoneId userZoneId = ZoneId.of(photoFilterRequest.getTimezone());
-        ZonedDateTime userZonedDateTime = utcZonedDateTime.withZoneSameInstant(userZoneId);
+        LocalDateTime localDateTime = null;
+        try {
+            localDateTime =  convertUtcToUserLocalTime(
+                    photoFilterRequest.getTime()
+            );
+            System.out.println("localDateTime request >>> " + localDateTime);
+        }catch (Exception e) {
+            throw new AppException(InValidErrorCode.TIME_ZONE_INVALID);
+        };
         
-        List<Photo> photos = photoRepository.findByAccount_IdInAndStatusAndCreatedAtLessThanEqualOrderByCreatedAtDesc(accountsFriend, 1, userZonedDateTime.toLocalDateTime(), pageable);
+        List<Photo> photos = photoRepository.findByAccount_IdInAndStatusAndCreatedAtLessThanEqualOrderByCreatedAtDesc(accountsFriend,
+                1,
+                localDateTime,
+                pageable);
         List<PhotoResponse> photoResponses = new ArrayList<>();
         for (Photo photo : photos) {
             PhotoResponse photoResponse = photoMapper.toPhotoResponse(photo);
@@ -97,6 +107,7 @@ public class PhotoService {
         return photoRepository.findByAccount_IdInAndStatusAndCreatedAtLessThanEqualOrderByCreatedAtDesc(accountsFriend, status, startTime, pageable);
     }
 
+    @Transactional
     public void post(PostRequest postRequest) {
         var context = SecurityContextHolder.getContext();
         String name = context.getAuthentication().getName();
@@ -104,14 +115,16 @@ public class PhotoService {
                 () -> new AppException(AccountErrorCode.USER_NOT_FOUND)
         );
 
-
+        LocalDateTime localDateTime = getCurrentTimeInSystemLocalTime();
+        System.out.println("localDateTime post >>> " + localDateTime);
         Photo photo = photoMapper.toPhoto(postRequest);
         photo.setAccount(account);
-        photo.setCreatedAt(LocalDateTime.now());
+        photo.setCreatedAt(localDateTime);
         photo.setStatus(1);
 
         try {
             photoRepository.save(photo);
+            notiService.pushNotiSocket(photo);
         } catch (Exception e) {
             throw new AppException(PhotoErrorCode.SAVE_PHOTO_FAIL);
         }
