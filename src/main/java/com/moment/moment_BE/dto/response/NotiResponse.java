@@ -19,4 +19,5 @@ public class NotiResponse {
     String urlAvt;
     String urlPhoto;
     String status;
+    String slug;
 }

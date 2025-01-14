@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "photo")
@@ -23,6 +24,9 @@ public class Photo {
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+
+    @Column(name = "slug")
+    private String slug;
 
     @Column(name = "url")
     private String url;
@@ -44,4 +48,9 @@ public class Photo {
     @OneToOne(mappedBy = "photo")
     @JsonBackReference
     private Noti noti;
+
+    @PrePersist
+    protected void onCreate() {
+        this.slug = UUID.randomUUID().toString();
+    }
 }

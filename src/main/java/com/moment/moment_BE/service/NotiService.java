@@ -100,6 +100,7 @@ public class NotiService {
 
         notiRes.setName(noti.getAccount().getProfile().getName());
         notiRes.setUserName(noti.getAccount().getUserName());
+        notiRes.setSlug(noti.getPhoto().getSlug());
 
         String avt = null;
         Photo photoOptional = photoRepository.findByAccount_IdAndStatus(noti.getAccount().getId(), 2);

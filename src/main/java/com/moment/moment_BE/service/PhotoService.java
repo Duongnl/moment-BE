@@ -7,8 +7,9 @@ import static com.moment.moment_BE.utils.DateTimeUtils.getCurrentTimeInSystemLoc
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
-import com.moment.moment_BE.exception.InValidErrorCode;
+import com.moment.moment_BE.exception.*;
 import com.moment.moment_BE.repository.FriendRepository;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -21,9 +22,6 @@ import com.moment.moment_BE.dto.response.PhotoResponse;
 import com.moment.moment_BE.entity.Account;
 import com.moment.moment_BE.entity.Friend;
 import com.moment.moment_BE.entity.Photo;
-import com.moment.moment_BE.exception.AccountErrorCode;
-import com.moment.moment_BE.exception.AppException;
-import com.moment.moment_BE.exception.PhotoErrorCode;
 import com.moment.moment_BE.mapper.AccountMapper;
 import com.moment.moment_BE.mapper.PhotoMapper;
 import com.moment.moment_BE.repository.AccountRepository;
@@ -46,6 +44,7 @@ public class PhotoService {
     AccountMapper accountMapper;
     AccountRepository accountRepository;
     NotiService notiService;
+    private final FriendRepository friendRepository;
 
     // lay anh cua ban be o pageCurrent voi so luong size tu thoi gian startTime voi status
     public List<PhotoResponse> getListPhotoMyFriends(PhotoFilterRequest photoFilterRequest, int status) {
@@ -63,14 +62,15 @@ public class PhotoService {
 
         LocalDateTime localDateTime = null;
         try {
-            localDateTime =  convertUtcToUserLocalTime(
+            localDateTime = convertUtcToUserLocalTime(
                     photoFilterRequest.getTime()
             );
             System.out.println("localDateTime request >>> " + localDateTime);
-        }catch (Exception e) {
+        } catch (Exception e) {
             throw new AppException(InValidErrorCode.TIME_ZONE_INVALID);
-        };
-        
+        }
+        ;
+
         List<Photo> photos = photoRepository.findByAccount_IdInAndStatusAndCreatedAtLessThanEqualOrderByCreatedAtDesc(accountsFriend,
                 1,
                 localDateTime,
@@ -130,5 +130,27 @@ public class PhotoService {
         }
 
 
+    }
+
+    public PhotoResponse getPhoto(String uuid) {
+
+        //        tim xem co bai viet khong
+        Photo photo = photoRepository.findBySlug(uuid);
+        if (photo == null) {
+            throw new AppException(PhotoErrorCode.PHOTO_NOT_FOUND);
+        }
+
+        //       kiem tra xem co phai la ban be cua nhau khong
+        Account account = authenticationService.getMyAccount(1);
+        Optional<Friend> friend = friendRepository.findByAccountUser_IdAndAccountFriend_IdAndStatus(account.getId(), photo.getAccount().getId(), "accepted");
+        if (friend.isEmpty()) {
+            throw new AppException(FriendErrorCode.FRIEND_NOT_FOUND);
+        }
+
+        PhotoResponse photoResponse = photoMapper.toPhotoResponse(photo);
+        accountMapper.toPhotoResponse(photoResponse, photo.getAccount());
+        photoResponse.setUrlAvt(getUrlAvtAccount(photo.getAccount().getId()));
+
+        return photoResponse;
     }
 }

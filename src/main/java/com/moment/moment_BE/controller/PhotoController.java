@@ -4,10 +4,7 @@ import java.util.List;
 
 import com.moment.moment_BE.dto.request.PostRequest;
 import jakarta.validation.Valid;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.moment.moment_BE.dto.request.PhotoFilterRequest;
 import com.moment.moment_BE.dto.response.ApiResponse;
@@ -53,6 +50,13 @@ public class PhotoController {
         System.out.println("post >>>>>>> "+getCurrentTimeInSystemLocalTime());
         return ApiResponse.<String>builder()
                 .result(getCurrentTimeInSystemLocalTime()+"")
+                .build();
+    }
+
+    @GetMapping()
+    public ApiResponse<PhotoResponse> getPhoto(@RequestParam String post) {
+        return ApiResponse.<PhotoResponse>builder()
+                .result(photoService.getPhoto(post))
                 .build();
     }
 
