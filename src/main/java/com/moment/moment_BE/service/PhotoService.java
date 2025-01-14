@@ -32,6 +32,7 @@ import com.moment.moment_BE.repository.PhotoRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 // kh khai bao gi het thi no autowired va private
@@ -65,12 +66,10 @@ public class PhotoService {
             localDateTime =  convertUtcToUserLocalTime(
                     photoFilterRequest.getTime()
             );
+            System.out.println("localDateTime request >>> " + localDateTime);
         }catch (Exception e) {
             throw new AppException(InValidErrorCode.TIME_ZONE_INVALID);
         };
-
-        System.out.println("Search >>>>>>> "+localDateTime);
-
         
         List<Photo> photos = photoRepository.findByAccount_IdInAndStatusAndCreatedAtLessThanEqualOrderByCreatedAtDesc(accountsFriend,
                 1,
@@ -108,6 +107,7 @@ public class PhotoService {
         return photoRepository.findByAccount_IdInAndStatusAndCreatedAtLessThanEqualOrderByCreatedAtDesc(accountsFriend, status, startTime, pageable);
     }
 
+    @Transactional
     public void post(PostRequest postRequest) {
         var context = SecurityContextHolder.getContext();
         String name = context.getAuthentication().getName();
@@ -116,8 +116,7 @@ public class PhotoService {
         );
 
         LocalDateTime localDateTime = getCurrentTimeInSystemLocalTime();
-        System.out.println("post >>>>>>> "+localDateTime);
-
+        System.out.println("localDateTime post >>> " + localDateTime);
         Photo photo = photoMapper.toPhoto(postRequest);
         photo.setAccount(account);
         photo.setCreatedAt(localDateTime);

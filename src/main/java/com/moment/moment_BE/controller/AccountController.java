@@ -1,12 +1,15 @@
 package com.moment.moment_BE.controller;
 
+import com.moment.moment_BE.dto.request.FriendFilterRequest;
 import com.moment.moment_BE.dto.request.FriendInviteRequest;
 import com.moment.moment_BE.dto.request.RegisterRequest;
 import com.moment.moment_BE.dto.response.AccountResponse;
+import com.moment.moment_BE.dto.response.AccountResult;
 import com.moment.moment_BE.dto.response.ApiResponse;
 import com.moment.moment_BE.dto.response.AuthenticationResponse;
 import com.moment.moment_BE.entity.Account;
 import com.moment.moment_BE.entity.Friend;
+import com.moment.moment_BE.enums.FriendStatus;
 import com.moment.moment_BE.service.AccountService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -49,12 +52,31 @@ public class AccountController {
                 .build();
     }
 
-    @GetMapping("/friend")
-    public ApiResponse<List<AccountResponse>> getFriends() {
-        List<AccountResponse> profileFriend = accountService.getListAccountFriend(1);
+    @PostMapping("/friend")
+    public ApiResponse<List<AccountResponse>> getFriends(@RequestBody @Valid FriendFilterRequest friendFilterRequest) {
+        AccountResult accountResult = accountService.getListAccountFriend(1, FriendStatus.accepted,friendFilterRequest);
 
         return ApiResponse.<List<AccountResponse>>builder()
-                .result(profileFriend)
+                .result(accountResult.getAccountResponseList())
+                .totalItems(accountResult.getCountAccountFriend())
+                .build();
+    }
+    @PostMapping("/friend/invited")
+    public ApiResponse<List<AccountResponse>> getFriendsInvited(@RequestBody @Valid FriendFilterRequest friendFilterRequest) {
+        AccountResult accountResult = accountService.getListAccountFriend(1,FriendStatus.invited,friendFilterRequest);
+
+        return ApiResponse.<List<AccountResponse>>builder()
+                .result(accountResult.getAccountResponseList())
+                .totalItems(accountResult.getCountAccountFriend())
+                .build();
+    }
+    @PostMapping("/friend/sent")
+    public ApiResponse<List<AccountResponse>> getFriendsSent(@RequestBody @Valid FriendFilterRequest friendFilterRequest) {
+        AccountResult accountResult = accountService.getListAccountFriend(1,FriendStatus.sent,friendFilterRequest);
+
+        return ApiResponse.<List<AccountResponse>>builder()
+                .result(accountResult.getAccountResponseList())
+                .totalItems(accountResult.getCountAccountFriend())
                 .build();
     }
 

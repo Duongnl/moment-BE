@@ -2,6 +2,7 @@ package com.moment.moment_BE.service;
 
 import com.moment.moment_BE.dto.request.NotiFilterRequest;
 import com.moment.moment_BE.dto.response.NotiResponse;
+import com.moment.moment_BE.dto.response.NotiResult;
 import com.moment.moment_BE.entity.Account;
 import com.moment.moment_BE.entity.Friend;
 import com.moment.moment_BE.entity.Noti;
@@ -46,7 +47,7 @@ public class NotiService {
     PhotoRepository photoRepository;
      SimpUserRegistry userRegistry;
 
-    public List<NotiResponse> getNoti(NotiFilterRequest notiFilterRequest) {
+    public NotiResult getNoti(NotiFilterRequest notiFilterRequest) {
 //        lay thong tin nguoi dung dang dang nhap
         Account account = authenticationService.getMyAccount(1);
 
@@ -63,62 +64,36 @@ public class NotiService {
                 notiFilterRequest.getTime()
         );
 
-        List<Noti> notiList = notiRepository.findByAccount_IdInAndCreatedAtLessThanEqualOrderByCreatedAtDesc(accountsFriend, localDateTime, pageable);
-
         List<NotiResponse> notiResponseList = new ArrayList<>();
-        for (Noti noti : notiList) {
-            NotiResponse notiRes = convertNotiToNotiResponse(noti);
-
-
-            if (notiFilterRequest.getStatus().equals("unread")
-                    && notiRes.getStatus().equals("unread")) {
-                notiResponseList.add(notiRes);
-            } else if (notiFilterRequest.getStatus().equals("all")) {
-                notiResponseList.add(notiRes);
-            }
-
-        }
-
-        return notiResponseList;
-    }
-
-    public int countNoti (NotiFilterRequest notiFilterRequest)  {
         int countNoti = 0;
-
-        Account account = authenticationService.getMyAccount(1);
-
-        List<String> accountsFriend = new ArrayList<>();
-        for (Friend friend : account.getFriends()) {
-            if (friend.getStatus().equals("accepted")) {
-                accountsFriend.add(friend.getAccountFriend().getId());
-            }
-        }
-
-        LocalDateTime localDateTime = convertUtcToUserLocalTime(
-                notiFilterRequest.getTime()
-        );
-
-        if (notiFilterRequest.getStatus().equals("unread")) {
-            List<Noti> notiList = notiRepository.findByAccount_IdInAndCreatedAtLessThanEqualOrderByCreatedAtDesc(accountsFriend, localDateTime);
-
+        if(notiFilterRequest.getStatus().equals("unread")) {
+            List<Noti> notiList = notiRepository.findNotiUnread(accountsFriend, account.getId(),localDateTime, pageable);
             for (Noti noti : notiList) {
-                if (!notiViewRepository.existsByAccount_IdAndNoti_Id
-                        (account.getId(), noti.getId())) {
-                    countNoti = countNoti + 1;
-                }
-
+                NotiResponse notiRes = convertNotiToNotiResponseNoStatus(noti);
+                notiRes.setStatus("unread");
+                notiResponseList.add(notiRes);
             }
-        } else if (notiFilterRequest.getStatus().equals("all")) {
-            countNoti = notiRepository.countByAccount_IdInAndCreatedAtLessThanEqual(accountsFriend, localDateTime);
+            countNoti = notiRepository.countNotiUnread(accountsFriend, account.getId(), localDateTime);
+    } else if (notiFilterRequest.getStatus().equals("all")) {
+            List<Object[]> results = notiRepository.findNotiAll(accountsFriend, account.getId(),localDateTime, pageable);
+            for (Object[] result : results) {
+                Noti noti = (Noti) result[0];
+
+                NotiResponse notiRes = convertNotiToNotiResponseNoStatus(noti);
+                notiRes.setStatus((String) result[1]);
+                notiResponseList.add(notiRes);
+            }
+            countNoti = notiRepository.countNotiAll(accountsFriend, account.getId(), localDateTime);
         }
 
-
-
-        return countNoti;
-
+        NotiResult notiResult = new NotiResult();
+        notiResult.setNotiResponseList(notiResponseList);
+        notiResult.setCountNoti(countNoti);
+        return notiResult;
     }
 
-    public NotiResponse convertNotiToNotiResponse(Noti noti) {
+
+    public NotiResponse convertNotiToNotiResponseNoStatus(Noti noti) {
         Account account = authenticationService.getMyAccount(1);
         NotiResponse notiRes = new NotiResponse();
         notiRes = notiMapper.toNotiResponse(noti);
@@ -133,12 +108,6 @@ public class NotiService {
         }
         notiRes.setUrlAvt(avt);
         notiRes.setUrlPhoto(noti.getPhoto().getUrl());
-
-        if (notiViewRepository.existsByAccount_IdAndNoti_Id(account.getId(), noti.getId())) {
-            notiRes.setStatus("read");
-        } else {
-            notiRes.setStatus("unread");
-        }
 
         return notiRes;
     }
@@ -161,9 +130,12 @@ public class NotiService {
 
         for (Friend friend : account.getFriends()) {
             if (friend.getStatus().equals("accepted")) {
-                System.out.println( "userRegistry: " +  userRegistry.getUser(friend.getAccountFriend().getUserName()));
+//                System.out.println( "userRegistry: " +  userRegistry.getUser(friend.getAccountFriend().getUserName()));
                 if (userRegistry.getUser(friend.getAccountFriend().getUserName()) != null) {
-                messagingTemplate.convertAndSendToUser(friend.getAccountFriend().getUserName(), "/queue/noti", convertNotiToNotiResponse(noti));
+                    System.out.println("send friend >>> " + friend.getAccountFriend().getUserName());
+                    NotiResponse notiResponse = convertNotiToNotiResponseNoStatus(noti);
+                    notiResponse.setStatus("unread");
+                messagingTemplate.convertAndSendToUser(friend.getAccountFriend().getUserName(), "/queue/noti", notiResponse);
                 }
 
             }
