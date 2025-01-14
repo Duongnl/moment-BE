@@ -6,5 +6,6 @@ public enum FriendStatus {
     blocked,
     invited,
     sent,
-    deleted
+    deleted,
+    me,
 }
