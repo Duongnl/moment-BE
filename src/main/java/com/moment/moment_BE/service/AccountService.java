@@ -179,6 +179,31 @@ public class AccountService {
                 .build();
     }
 
+    @Transactional
+    public AccountResult getListAccountFriendInvitedRecent(int status ) {
+        Account account = authenticationService.getMyAccount(status);
+
+        Pageable pageable = PageRequest.of(0, 3);
+
+        List<Friend> friends = friendRepository.findByAccountUser_IdAndAccountInitiator_IdNotAndStatusAndRequestedAtBetweenOrderByRequestedAtDesc(
+                        account.getId(), account.getId(), "pending", LocalDateTime.now().minusMonths(3), LocalDateTime.now(), pageable
+                );
+
+
+
+        return AccountResult.builder()
+                .accountResponseList(
+                        friends.stream()
+                                .map(friend -> toAccountResponse(
+                                        friend.getAccountFriend(),
+                                        friend.getStatus(),
+                                        friend.getRequestedAt(),
+                                        friend.getAccountInitiator() == account)
+                                )
+                                .collect(Collectors.toList()))
+                .build();
+    }
+
     private List<Friend> getFriendsByStatus(Account account, FriendStatus friendStatus, LocalDateTime acceptedAt, Pageable pageable) {
         return switch (friendStatus) {
             case accepted ->
@@ -327,9 +352,9 @@ public class AccountService {
         if (status == FriendStatus.accepted)
             return friendRepository.countFriend(accountId, "accepted");
         if (status == FriendStatus.sent)
-            return friendRepository.countFriendSent(accountId, "accepted");
+            return friendRepository.countFriendSent(accountId, "pending");
         if (status == FriendStatus.invited)
-            return friendRepository.countFriendInvited(accountId, "accepted");
+            return friendRepository.countFriendInvited(accountId, "pending");
         return 0;
     }
 
