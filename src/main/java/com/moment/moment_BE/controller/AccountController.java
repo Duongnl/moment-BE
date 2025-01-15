@@ -76,6 +76,15 @@ public class AccountController {
                 .totalItems(accountResult.getCountAccountFriend())
                 .build();
     }
+
+    @GetMapping("/friend/invited-recent")
+    public ApiResponse<List<AccountResponse>> getFriendsInvitedRecent() {
+        AccountResult accountResult = accountService.getListAccountFriendInvitedRecent(1);
+
+        return ApiResponse.<List<AccountResponse>>builder()
+                .result(accountResult.getAccountResponseList())
+                .build();
+    }
     @PostMapping("/friend/sent")
     public ApiResponse<List<AccountResponse>> getFriendsSent(@RequestBody @Valid FriendFilterRequest friendFilterRequest) {
         AccountResult accountResult = accountService.getListAccountFriend(1,FriendStatus.sent,friendFilterRequest);
