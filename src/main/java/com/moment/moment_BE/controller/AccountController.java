@@ -34,7 +34,6 @@ public class AccountController {
 
      AccountService accountService;
 
-
     @GetMapping()
     public  List<Account> getAll() {
 //        lay ra all account
@@ -67,9 +66,10 @@ public class AccountController {
                 .totalItems(accountResult.getCountAccountFriend())
                 .build();
     }
-    @PostMapping("/friend/invited")
-    public ApiResponse<List<AccountResponse>> getFriendsInvited(@RequestBody @Valid FriendFilterRequest friendFilterRequest) {
-        AccountResult accountResult = accountService.getListAccountFriend(1,FriendStatus.invited,friendFilterRequest);
+
+    @PostMapping("/friend/received")
+    public ApiResponse<List<AccountResponse>> getFriendsReceived(@RequestBody @Valid FriendFilterRequest friendFilterRequest) {
+        AccountResult accountResult = accountService.getListAccountFriend(1,FriendStatus.received,friendFilterRequest);
 
         return ApiResponse.<List<AccountResponse>>builder()
                 .result(accountResult.getAccountResponseList())
@@ -77,14 +77,15 @@ public class AccountController {
                 .build();
     }
 
-    @GetMapping("/friend/invited-recent")
-    public ApiResponse<List<AccountResponse>> getFriendsInvitedRecent() {
-        AccountResult accountResult = accountService.getListAccountFriendInvitedRecent(1);
+    @GetMapping("/friend/received-recent")
+    public ApiResponse<List<AccountResponse>> getFriendsReceivedRecent() {
+        AccountResult accountResult = accountService.getListAccountFriendReceivedRecent(1);
 
         return ApiResponse.<List<AccountResponse>>builder()
                 .result(accountResult.getAccountResponseList())
                 .build();
     }
+
     @PostMapping("/friend/sent")
     public ApiResponse<List<AccountResponse>> getFriendsSent(@RequestBody @Valid FriendFilterRequest friendFilterRequest) {
         AccountResult accountResult = accountService.getListAccountFriend(1,FriendStatus.sent,friendFilterRequest);
@@ -104,7 +105,7 @@ public class AccountController {
     }
 
 
-    @PostMapping("friend/status")
+    @PutMapping("friend/status")
     public ApiResponse<?> changeFriendStatus(@RequestBody @Valid FriendInviteRequest friendInviteRequest) {
 
         AccountResponse friendResponse =accountService.changeStatusFriend(friendInviteRequest,1);
@@ -129,7 +130,6 @@ public class AccountController {
                 .result(accountResponse)
                 .build();
     }
-
 
     @PutMapping("/setting")
     public ApiResponse<Void> updateAccountInfo(@RequestBody AccountInfoRequest updateRequest) {

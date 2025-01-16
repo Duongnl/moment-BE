@@ -46,8 +46,8 @@ public interface FriendRepository extends JpaRepository<Friend, Integer> {
                 "AND f.accountInitiator.id NOT IN :accountUserId " +
                 "AND f.status IN :status "
         )
-        int countFriendInvited (@Param("accountUserId") String accountUserId,
-                         @Param("status") String status);
+        int countFriendReceived(@Param("accountUserId") String accountUserId,
+                                @Param("status") String status);
 
         @Query("SELECT COUNT(f) FROM  Friend f " +
                 "WHERE f.accountUser.id IN :accountUserId " +
