@@ -4,7 +4,8 @@ public enum FriendStatus {
     none,
     accepted,
     blocked,
-    invited,
+    received,
     sent,
-    deleted
+    deleted,
+    me,
 }
