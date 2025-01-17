@@ -5,5 +5,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface NotiViewRepository extends JpaRepository<NotiView,Integer> {
     boolean existsByAccount_IdAndNoti_Id(String accountId,int photoId);
-
+    NotiView findByAccount_IdAndNoti_Id(String accountId,int photoId);
 }

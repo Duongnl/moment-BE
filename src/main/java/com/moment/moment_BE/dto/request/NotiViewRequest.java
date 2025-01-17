@@ -1,8 +1,7 @@
-package com.moment.moment_BE.dto.response;
+package com.moment.moment_BE.dto.request;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
 import java.util.List;
 
 @Data
@@ -10,7 +9,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class NotiResult {
-     List<NotiResponse> notiResponseList;
-     int countNoti;
+public class NotiViewRequest {
+    List<Integer> notiIds;
+
 }

@@ -9,8 +9,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import com.moment.moment_BE.entity.NotiView;
 import com.moment.moment_BE.exception.*;
 import com.moment.moment_BE.repository.FriendRepository;
+import com.moment.moment_BE.repository.NotiViewRepository;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -44,6 +46,7 @@ public class PhotoService {
     AccountMapper accountMapper;
     AccountRepository accountRepository;
     NotiService notiService;
+    NotiViewRepository notiViewRepository;
     private final FriendRepository friendRepository;
 
     // lay anh cua ban be o pageCurrent voi so luong size tu thoi gian startTime voi status
@@ -150,6 +153,24 @@ public class PhotoService {
         PhotoResponse photoResponse = photoMapper.toPhotoResponse(photo);
         accountMapper.toPhotoResponse(photoResponse, photo.getAccount());
         photoResponse.setUrlAvt(getUrlAvtAccount(photo.getAccount().getId()));
+
+        NotiView notiView = notiViewRepository.findByAccount_IdAndNoti_Id(account.getId(), photo.getNoti().getId());
+        if (notiView == null) {
+            NotiView notiViewNew = new NotiView();
+            notiViewNew.setAccount(account);
+            notiViewNew.setNoti(photo.getNoti());
+
+            LocalDateTime localDateTime = getCurrentTimeInSystemLocalTime();
+            notiViewNew.setViewedAt(localDateTime);
+            notiViewNew.setStatus("read");
+            notiViewRepository.save(notiViewNew);
+        } else {
+            if (notiView.getStatus().equals("unread")) {
+                notiView.setStatus("read");
+                notiViewRepository.save(notiView);
+            }
+        }
+
 
         return photoResponse;
     }

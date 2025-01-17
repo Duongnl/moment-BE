@@ -47,9 +47,7 @@ public class PhotoController {
     public ApiResponse<?> post(@RequestBody @Valid PostRequest postRequest) {
 
         photoService.post(postRequest);
-        System.out.println("post >>>>>>> "+getCurrentTimeInSystemLocalTime());
-        return ApiResponse.<String>builder()
-                .result(getCurrentTimeInSystemLocalTime()+"")
+        return ApiResponse.builder()
                 .build();
     }
 
