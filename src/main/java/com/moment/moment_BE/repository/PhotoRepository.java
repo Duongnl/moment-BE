@@ -13,4 +13,6 @@ public interface PhotoRepository extends JpaRepository<Photo,Integer> {
     List<Photo> findByAccount_IdAndStatusAndCreatedAtLessThanEqualOrderByCreatedAtDesc(String accountId , int status ,  LocalDateTime startTime, Pageable pageable  );
 
     Photo findByAccount_IdAndStatus(String accountId, int status);
+
+    Photo findBySlug(String slug);
 }
