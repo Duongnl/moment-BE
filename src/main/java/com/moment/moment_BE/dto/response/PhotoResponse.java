@@ -19,7 +19,7 @@ public class PhotoResponse {
     private String urlPhoto;
     private String caption;
     private LocalDateTime createdAt;
-
+    private String slug;
     private String name;
     private String urlAvt;
     private String userName;
