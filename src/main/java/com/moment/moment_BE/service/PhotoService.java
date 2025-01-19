@@ -81,9 +81,9 @@ public class PhotoService {
         List<PhotoResponse> photoResponses = new ArrayList<>();
         for (Photo photo : photos) {
             PhotoResponse photoResponse = photoMapper.toPhotoResponse(photo);
+            System.out.println("slug >>>> " + photoResponse.getSlug());
             accountMapper.toPhotoResponse(photoResponse, photo.getAccount());
             photoResponse.setUrlAvt(getUrlAvtAccount(photo.getAccount().getId()));
-
             photoResponses.add(photoResponse);
         }
         return photoResponses;
