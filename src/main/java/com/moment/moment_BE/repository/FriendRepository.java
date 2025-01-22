@@ -23,12 +23,12 @@ public interface FriendRepository extends JpaRepository<Friend, Integer> {
 
         List<Friend> findByAccountUser_IdAndAccountInitiator_IdNotAndStatusAndRequestedAtLessThanEqualOrderByRequestedAtDesc(String accountId, String accountInitiatorId,
                         String status,LocalDateTime acceptedAt, Pageable pageable);
+//        Optional<Friend> findFriendshipBetweenUsers(String accountId1, String accountId2);
+
 
         Optional<Friend> findByAccountUser_IdAndAccountFriend_IdAndStatus(String AccountUser_id,
                         String AccountFriend_Id, String status);
 
-        Optional<Friend> findByAccountUser_IdAndAccountFriend_IdAndStatusNot(String AccountUser_id,
-                        String AccountFriend_Id, String Status);
 
         Optional<Friend> findByAccountUser_IdAndAccountFriend_Id(String AccountUser_id, String AccountFriend_Id);
 

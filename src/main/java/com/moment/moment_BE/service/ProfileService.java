@@ -6,6 +6,7 @@ import com.moment.moment_BE.dto.request.ProfileFilterRequest;
 import com.moment.moment_BE.dto.response.PhotoResponse;
 import com.moment.moment_BE.dto.response.ProfileResponse;
 import com.moment.moment_BE.entity.Account;
+import com.moment.moment_BE.entity.Friend;
 import com.moment.moment_BE.entity.Photo;
 import com.moment.moment_BE.entity.Profile;
 import com.moment.moment_BE.exception.AccountErrorCode;
@@ -71,6 +72,7 @@ public class ProfileService {
 
 
         ProfileResponse profileResponse =  new ProfileResponse();
+        profileResponse.setIdAccount(pro.getAccount().getId());
         profileResponse.setId(pro.getId());
         profileResponse.setUserName(pro.getAccount().getUserName());
         profileResponse.setName(pro.getName());
@@ -85,7 +87,24 @@ public class ProfileService {
             throw new AppException(InValidErrorCode.TIME_ZONE_INVALID);
         };
 
-        if ( account.getId().equals( pro.getAccount().getId()) ||
+        String friendStatus;
+        if (account.getId().equals(pro.getAccount().getId()) )
+        {
+            friendStatus = "me";
+        }
+        else {
+            friendStatus = friendRepository
+                    .findByAccountUser_IdAndAccountFriend_Id(
+                            account.getId(), pro.getAccount().getId()
+                    )
+                    .map(Friend::getStatus)
+                    .orElse("none");
+        }
+
+        profileResponse.setFriendStatus(friendStatus);
+
+
+        if ( account.getId().equals( pro.getAccount().getId())|| "accepted".equals(friendStatus) ||
                 friendRepository.findByAccountUser_IdAndAccountFriend_IdAndStatus(account.getId() , pro.getAccount().getId(), "accepted").isPresent())
         {
 
@@ -112,5 +131,11 @@ public class ProfileService {
 
         return profileResponse;
     }
+//    public String getStatus(String accountId)
+//    {
+//        return friendRepository.findByAccount_IdAndAccountFriend_IdOrAccountFriend_IdAndAccount_Id(
+//                account.getId(), accountId, accountId, account.getId()
+//                ).map(Friend::getStatus).orElse("not_friends");
+//    }
 
 }

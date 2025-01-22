@@ -13,9 +13,11 @@ import java.util.List;
 public class ProfileResponse {
 
     int id;
+    String idAccount;
     String userName;
     String name;
     List<PhotoResponse> listPhotoProfile;
     String urlAvt;
     int quantityFriend;
+    private String friendStatus;
 }
