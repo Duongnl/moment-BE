@@ -53,21 +53,9 @@ public class NotiService {
             }
         }
 
-
-        Pageable pageable = PageRequest.of(notiFilterRequest.getPageCurrent(), 6);
-
-        LocalDateTime localDateTime = null;
-        try {
-            localDateTime =  convertUtcToUserLocalTime(
-                    notiFilterRequest.getTime()
-            );
-        }catch (Exception e) {
-            throw new AppException(InValidErrorCode.TIME_ZONE_INVALID);
-        };
-
         List<NotiResponse> notiResponseList = new ArrayList<>();
         if(notiFilterRequest.getStatus().equals("unread")) {
-            List<Object[]> results = notiRepository.findNotiUnread(accountsFriend, account.getId(),localDateTime, notiFilterRequest.getLimit(), notiFilterRequest.getOffset());
+            List<Object[]> results = notiRepository.findNotiUnread(accountsFriend, account.getId(),notiFilterRequest.getTime(), notiFilterRequest.getLimit());
             for (Object[] result : results) {
                 Noti noti = (Noti) result[0];
 
@@ -77,7 +65,7 @@ public class NotiService {
             }
 
     } else if (notiFilterRequest.getStatus().equals("all")) {
-            List<Object[]> results = notiRepository.findNotiAll(accountsFriend, account.getId(),localDateTime,  notiFilterRequest.getLimit(), notiFilterRequest.getOffset());
+            List<Object[]> results = notiRepository.findNotiAll(accountsFriend, account.getId(), notiFilterRequest.getTime(),  notiFilterRequest.getLimit());
             for (Object[] result : results) {
                 Noti noti = (Noti) result[0];
 
@@ -142,8 +130,8 @@ public class NotiService {
         }
     }
 
-//    noti new la nhung noti ma khong ton tai trong bang noti view
-    public int countNotiNew (String time) {
+
+    public NumberOfNotiResponse countNoti  (LocalDateTime time)  {
         Account account = authenticationService.getMyAccount(1);
 
         List<String> accountsFriend = new ArrayList<>();
@@ -152,89 +140,11 @@ public class NotiService {
                 accountsFriend.add(friend.getAccountFriend().getId());
             }
         }
-
-
-        LocalDateTime localDateTime = null;
-        try {
-            localDateTime =  convertUtcToUserLocalTime(
-                 time
-            );
-        }catch (Exception e) {
-            throw new AppException(InValidErrorCode.TIME_ZONE_INVALID);
-        };
-
-        return notiRepository.countNotiNew(accountsFriend, account.getId(), localDateTime);
-    }
-
-    public int countNotiAll (String time) {
-        Account account = authenticationService.getMyAccount(1);
-
-        List<String> accountsFriend = new ArrayList<>();
-        for (Friend friend : account.getFriends()) {
-            if (friend.getStatus().equals("accepted")) {
-                accountsFriend.add(friend.getAccountFriend().getId());
-            }
-        }
-
-        LocalDateTime localDateTime = null;
-        try {
-            localDateTime =  convertUtcToUserLocalTime(
-                    time
-            );
-        }catch (Exception e) {
-            throw new AppException(InValidErrorCode.TIME_ZONE_INVALID);
-        };
-
-
-        return notiRepository.countNotiAll(accountsFriend, account.getId(), localDateTime);
-    }
-
-    public int countNotiUnread (String time) {
-        Account account = authenticationService.getMyAccount(1);
-
-        List<String> accountsFriend = new ArrayList<>();
-        for (Friend friend : account.getFriends()) {
-            if (friend.getStatus().equals("accepted")) {
-                accountsFriend.add(friend.getAccountFriend().getId());
-            }
-        }
-
-        LocalDateTime localDateTime = null;
-        try {
-            localDateTime =  convertUtcToUserLocalTime(
-                    time
-            );
-        }catch (Exception e) {
-            throw new AppException(InValidErrorCode.TIME_ZONE_INVALID);
-        };
-
-
-        return notiRepository.countNotiUnread(accountsFriend, account.getId(), localDateTime);
-    }
-
-    public NumberOfNotiResponse countNoti  (String time)  {
-        Account account = authenticationService.getMyAccount(1);
-
-        List<String> accountsFriend = new ArrayList<>();
-        for (Friend friend : account.getFriends()) {
-            if (friend.getStatus().equals("accepted")) {
-                accountsFriend.add(friend.getAccountFriend().getId());
-            }
-        }
-
-        LocalDateTime localDateTime = null;
-        try {
-            localDateTime =  convertUtcToUserLocalTime(
-                    time
-            );
-        }catch (Exception e) {
-            throw new AppException(InValidErrorCode.TIME_ZONE_INVALID);
-        };
 
         NumberOfNotiResponse numberOfNotiResponse = new NumberOfNotiResponse();
-        numberOfNotiResponse.setNumberOfNotiUnread(notiRepository.countNotiUnread(accountsFriend, account.getId(), localDateTime));
-        numberOfNotiResponse.setNumberOfNotiNew(notiRepository.countNotiNew(accountsFriend, account.getId(), localDateTime));
-        numberOfNotiResponse.setNumberOfNotiAll(notiRepository.countNotiAll(accountsFriend, account.getId(), localDateTime));
+//        numberOfNotiResponse.setNumberOfNotiUnread(notiRepository.countNotiUnread(accountsFriend, account.getId(), localDateTime));
+        numberOfNotiResponse.setNumberOfNotiNew(notiRepository.countNotiNew(accountsFriend, account.getId(), time));
+//        numberOfNotiResponse.setNumberOfNotiAll(notiRepository.countNotiAll(accountsFriend, account.getId(), localDateTime));
         return numberOfNotiResponse;
     }
 

@@ -22,6 +22,7 @@ import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -36,7 +37,7 @@ public class NotiController {
 
     @PostMapping("/get")
     public ApiResponse<List<NotiResponse>> getNoti(@RequestBody @Valid NotiFilterRequest notiFilterRequest) {
-
+        System.out.println("noti filter request: " + notiFilterRequest);
         return ApiResponse.<List<NotiResponse>>builder()
                 .result(notiService.getNoti(notiFilterRequest))
                 .currentPage(notiFilterRequest.getPageCurrent())
@@ -70,7 +71,7 @@ public class NotiController {
 
 
     @GetMapping("/count-noti")
-    public ApiResponse<NumberOfNotiResponse> countNoti(@RequestParam String time) {
+    public ApiResponse<NumberOfNotiResponse> countNoti(@RequestParam LocalDateTime time) {
 
         return ApiResponse.<NumberOfNotiResponse>builder()
                 .result(notiService.countNoti(time))
