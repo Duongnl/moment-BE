@@ -8,6 +8,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import com.moment.moment_BE.dto.response.AccountResult;
+import com.moment.moment_BE.dto.response.AccountSettingResponse;
 import com.moment.moment_BE.utils.DateTimeUtils;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -19,11 +20,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.moment.moment_BE.dto.request.FriendFilterRequest;
 import com.moment.moment_BE.dto.request.FriendInviteRequest;
+import com.moment.moment_BE.dto.request.ChangePasswordRequest;
 import com.moment.moment_BE.dto.request.RegisterRequest;
 import com.moment.moment_BE.dto.response.AccountResponse;
 import com.moment.moment_BE.dto.response.AuthenticationResponse;
 import com.moment.moment_BE.entity.Account;
 import com.moment.moment_BE.entity.Friend;
+import com.moment.moment_BE.dto.request.AccountInfoRequest;
 import com.moment.moment_BE.entity.Profile;
 import com.moment.moment_BE.enums.FriendStatus;
 import com.moment.moment_BE.exception.AccountErrorCode;
@@ -39,6 +42,9 @@ import com.moment.moment_BE.repository.ProfileRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.security.core.context.SecurityContextHolder;
+
+import java.util.List;
 
 @Service
 // kh khai bao gi het thi no autowired va private
@@ -125,9 +131,9 @@ public class AccountService {
         // Xây dựng response list
         List<AccountResponse> responseList = new ArrayList<>();
         for (Account account : listAccount) {
-            if(account==accountLogin) {
+            if (account == accountLogin) {
                 responseList.add(toAccountResponse(account, "me", null, false));
-            }else {
+            } else {
                 Friend friend = friendMap.get(account.getId());
                 if (friend == null) {
                     responseList.add(toAccountResponse(account, "none", null, false));
@@ -173,6 +179,30 @@ public class AccountService {
                 .build();
     }
 
+    @Transactional
+    public AccountResult getListAccountFriendReceivedRecent(int status) {
+        Account account = authenticationService.getMyAccount(status);
+
+        Pageable pageable = PageRequest.of(0, 3);
+
+        List<Friend> friends = friendRepository.findByAccountUser_IdAndAccountInitiator_IdNotAndStatusAndRequestedAtBetweenOrderByRequestedAtDesc(
+                account.getId(), account.getId(), "pending", getCurrentTimeInSystemLocalTime().minusMonths(3), getCurrentTimeInSystemLocalTime(), pageable
+        );
+
+
+        return AccountResult.builder()
+                .accountResponseList(
+                        friends.stream()
+                                .map(friend -> toAccountResponse(
+                                        friend.getAccountFriend(),
+                                        friend.getStatus(),
+                                        friend.getRequestedAt(),
+                                        friend.getAccountInitiator() == account)
+                                )
+                                .collect(Collectors.toList()))
+                .build();
+    }
+
     private List<Friend> getFriendsByStatus(Account account, FriendStatus friendStatus, LocalDateTime acceptedAt, Pageable pageable) {
         return switch (friendStatus) {
             case accepted ->
@@ -183,7 +213,7 @@ public class AccountService {
                     friendRepository.findByAccountUser_IdAndAccountInitiator_IdAndStatusAndRequestedAtLessThanEqualOrderByRequestedAtDesc(
                             account.getId(), account.getId(), "pending", acceptedAt, pageable
                     );
-            case invited ->
+            case received ->
                     friendRepository.findByAccountUser_IdAndAccountInitiator_IdNotAndStatusAndRequestedAtLessThanEqualOrderByRequestedAtDesc(
                             account.getId(), account.getId(), "pending", acceptedAt, pageable
                     );
@@ -191,11 +221,11 @@ public class AccountService {
         };
     }
 
-    private FriendStatus determineFriendStatus(String status, boolean isInitiator) {
+    public FriendStatus determineFriendStatus(String status, boolean isInitiator) {
         return switch (status) {
-            case "me"-> FriendStatus.me;
+            case "me" -> FriendStatus.me;
             case "accepted" -> FriendStatus.accepted;
-            case "pending" -> isInitiator ? FriendStatus.sent : FriendStatus.invited;
+            case "pending" -> isInitiator ? FriendStatus.sent : FriendStatus.received;
             default -> FriendStatus.none;
         };
     }
@@ -209,28 +239,43 @@ public class AccountService {
         return accountResponse;
     }
 
+    private String CheckStatusFriend(Friend friend) {
+        String status = friend.getStatus();
+        if (Objects.equals(status, "pending")) {
+            if (friend.getAccountInitiator() == friend.getAccountUser())
+                return "sent";
+            else return "received";
+        }
+        return status;
+    }
+
     @Transactional
     public AccountResponse addFriend(FriendInviteRequest friendInviteRequest, int status) {
         Account account = authenticationService.getMyAccount(status);
         Account accountFriend = findByIdAndStatus(friendInviteRequest.getAccountFriendId(), status);
 
+        // loi ket ban voi chinh minh
         if (account == accountFriend) {
             throw new AppException(FriendErrorCode.FRIEND_ERROR);
         }
 
+        //kiem tra da co trong bang friend chua
         Friend friend = friendRepository.findByAccountUser_IdAndAccountFriend_Id(
                 account.getId(),
                 accountFriend.getId()).orElse(null);
 
+        //neu co trong bang friend thi kiem tra dang trong truong hop nao
         if (friend != null) {
             Map<String, FriendErrorCode> statusErrorMap = Map.of(
                     "accepted", FriendErrorCode.FRIEND_ACCEPTED,
                     "blocked", FriendErrorCode.FRIEND_BLOCKED,
-                    "pending", FriendErrorCode.FRIEND_PENDING
+                    "received", FriendErrorCode.FRIEND_RECEIVED,
+                    "sent", FriendErrorCode.FRIEND_SENT
             );
 
-            throw new AppException(statusErrorMap.getOrDefault(friend.getStatus(), FriendErrorCode.FRIEND_ERROR));
+            throw new AppException(statusErrorMap.getOrDefault(CheckStatusFriend(friend), FriendErrorCode.FRIEND_ERROR));
         }
+
         friendRepository.save(createFriend(account, accountFriend, account));
         friendRepository.save(createFriend(accountFriend, account, account));
 
@@ -252,6 +297,11 @@ public class AccountService {
     public AccountResponse changeStatusFriend(FriendInviteRequest friendInviteRequest, int status) {
         Account account = authenticationService.getMyAccount(status);
         Account accountFriend = findByIdAndStatus(friendInviteRequest.getAccountFriendId(), 1);
+
+        // loi ket ban voi chinh minh
+        if (account == accountFriend) {
+            throw new AppException(FriendErrorCode.FRIEND_ERROR);
+        }
 
         Friend friend = friendRepository.findByAccountUser_IdAndAccountFriend_Id(
                 account.getId(),
@@ -321,9 +371,85 @@ public class AccountService {
         if (status == FriendStatus.accepted)
             return friendRepository.countFriend(accountId, "accepted");
         if (status == FriendStatus.sent)
-            return friendRepository.countFriendSent(accountId, "accepted");
-        if (status == FriendStatus.invited)
-            return friendRepository.countFriendInvited(accountId, "accepted");
+            return friendRepository.countFriendSent(accountId, "pending");
+        if (status == FriendStatus.received)
+            return friendRepository.countFriendReceived(accountId, "pending");
         return 0;
     }
+
+    //    -----------------------------------------------------
+    public AccountSettingResponse getAccountInfo() {
+        // Lấy tên người dùng hiện tại từ ngữ cảnh bảo mật
+        var context = SecurityContextHolder.getContext();
+        String userName = context.getAuthentication().getName();
+
+        // Lấy thông tin Profile dựa trên userName hiện tại
+        Profile profile = profileRepository.findByUserName(userName)
+                .orElseThrow(() -> new AppException(AccountErrorCode.USER_NOT_FOUND));
+
+        // Xây dựng phản hồi AccountResponse từ Profile
+        return AccountSettingResponse.builder()
+                .name(profile.getName())
+                .email(profile.getAccount().getEmail())
+                .userName(profile.getAccount().getUserName())
+                .birthday(profile.getBirthday())
+                .sex(profile.getSex())
+                .phoneNumber(profile.getAccount().getPhoneNumber())
+                .address(profile.getAddress())
+                .build();
+    }
+
+    public void updateAccountInfo(String userName, AccountInfoRequest updateRequest) {
+        // Kiểm tra sự tồn tại của Profile
+        Profile profile = profileRepository.findByUserName(userName)
+                .orElseThrow(() -> new AppException(AccountErrorCode.USER_NOT_FOUND));
+
+        // Cập nhật thông tin Profile
+        profileRepository.updateProfileByUserName(
+                updateRequest.getName(),
+                updateRequest.getBirthday(),
+                updateRequest.getSex(),
+                updateRequest.getAddress(),
+                userName
+        );
+    }
+
+    public void changUserName(String currentUserName, String newUserName) {
+        if (accountRepository.existsByUserName(newUserName)) {
+            throw new AppException(AccountErrorCode.USER_NAME_EXISTED);
+        }
+        Account account = accountRepository.findByUserNameAndStatus(currentUserName, 1)
+                .orElseThrow(() -> new AppException(AccountErrorCode.USER_NOT_FOUND));
+        account.setUserName(newUserName);
+        accountRepository.save(account);
+    }
+
+    public void changePassword(String userName, ChangePasswordRequest request) {
+        // Tìm tài khoản dựa trên tên người dùng
+        Account account = accountRepository.findByUserNameAndStatus(userName, 1)
+                .orElseThrow(() -> new AppException(AccountErrorCode.USER_NOT_FOUND));
+
+        // Kiểm tra mật khẩu cũ
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
+        if (!passwordEncoder.matches(request.getOldPassword(), account.getPassword())) {
+            throw new AppException(AccountErrorCode.OLD_PASSWORD_INCORRECT);
+        }
+
+        // Kiểm tra nếu mật khẩu cũ và mật khẩu mới giống nhau
+        if (request.getOldPassword().equals(request.getNewPassword())) {
+            throw new AppException(AccountErrorCode.NEW_PASSWORD_SAME_AS_OLD);
+        }
+
+        // Cập nhật mật khẩu mới
+        account.setPassword(passwordEncoder.encode(request.getNewPassword()));
+
+        // Lưu tài khoản vào cơ sở dữ liệu
+        try {
+            accountRepository.save(account);
+        } catch (Exception e) {
+            throw new AppException(AccountErrorCode.SAVE_PASSWORD_FAIL);
+        }
+    }
+
+
 }

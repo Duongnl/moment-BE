@@ -23,4 +23,7 @@ public class NotiFilterRequest {
     @NotNull(message = "NOTI_STATUS_INVALID")
     String status;
 
+    int offset;
+    int limit;
+
 }

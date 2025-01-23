@@ -3,7 +3,7 @@ package com.moment.moment_BE.controller;
 import com.moment.moment_BE.dto.request.NotiFilterRequest;
 import com.moment.moment_BE.dto.response.ApiResponse;
 import com.moment.moment_BE.dto.response.NotiResponse;
-import com.moment.moment_BE.dto.response.NotiResult;
+import com.moment.moment_BE.dto.response.NumberOfNotiResponse;
 import com.moment.moment_BE.service.NotiService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -28,56 +28,55 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/noti")
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class NotiController {
 
-    SimpMessagingTemplate messagingTemplate;
-
     NotiService notiService;
 
-
-    @MessageMapping("/noti")
-    public void sendMessage(String chatMessage) {
-
-        messagingTemplate.convertAndSendToUser("duongngocle4231", "/topic/noti", chatMessage);
-        System.out.println("Sending message to: " + "duongngocle4231");
-    }
-
-//    @SubscribeMapping("/user/{username}/topic/noti")
-//    public void handleUserSubscription(@DestinationVariable String username, SimpMessageHeaderAccessor headerAccessor) {
-//        System.out.println("start get username >>>");
-//        // Lấy username từ sessionAttributes
-//        String authenticatedUsername = (String) headerAccessor.getSessionAttributes().get("userName");
-//
-//        // Kiểm tra xem username trong URL có khớp với username đã xác thực không
-//        if (authenticatedUsername == null || !authenticatedUsername.equals(username)) {
-//            throw new SecurityException("User is not authorized to subscribe to this topic");
-//        }
-//
-//        // Nếu username hợp lệ, cho phép subscribe
-//        System.out.println("User " + authenticatedUsername + " subscribed to /user/" + username + "/topic/noti");
-//    }
-
-//    @MessageMapping("/sendMessage")
-//    public void sendMessage(String message, SimpMessageHeaderAccessor headerAccessor) {
-//        String authenticatedUsername = (String) headerAccessor.getSessionAttributes().get("userName");
-//
-//        // Handle sending messages
-//        System.out.println("User " + authenticatedUsername + " sent message: " + message);
-//    }
-
-    @PostMapping("/noti/get")
+    @PostMapping("/get")
     public ApiResponse<List<NotiResponse>> getNoti(@RequestBody @Valid NotiFilterRequest notiFilterRequest) {
 
-        NotiResult notiResult = notiService.getNoti(notiFilterRequest);
-
-
         return ApiResponse.<List<NotiResponse>>builder()
-                .result(notiResult.getNotiResponseList())
+                .result(notiService.getNoti(notiFilterRequest))
                 .currentPage(notiFilterRequest.getPageCurrent())
-                .totalItems(notiResult.getCountNoti())
                 .build();
     }
+
+//    @GetMapping("/count-noti-new")
+//    public ApiResponse<Integer> countNotiNew(@RequestParam String time) {
+//
+//        return ApiResponse.<Integer>builder()
+//                .totalItems(notiService.countNotiNew(time))
+//                .build();
+//    }
+//
+//
+//    @GetMapping("/count-noti-all")
+//    public ApiResponse<Integer> countNotiAll(@RequestParam String time) {
+//
+//        return ApiResponse.<Integer>builder()
+//                .totalItems(notiService.countNotiAll(time))
+//                .build();
+//    }
+//
+//    @GetMapping("/count-noti-unread")
+//    public ApiResponse<Integer> countNotiUnread(@RequestParam String time) {
+//
+//        return ApiResponse.<Integer>builder()
+//                .totalItems(notiService.countNotiUnread(time))
+//                .build();
+//    }
+
+
+    @GetMapping("/count-noti")
+    public ApiResponse<NumberOfNotiResponse> countNoti(@RequestParam String time) {
+
+        return ApiResponse.<NumberOfNotiResponse>builder()
+                .result(notiService.countNoti(time))
+                .build();
+    }
+
 
 
 }

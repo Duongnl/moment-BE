@@ -23,12 +23,12 @@ public interface FriendRepository extends JpaRepository<Friend, Integer> {
 
         List<Friend> findByAccountUser_IdAndAccountInitiator_IdNotAndStatusAndRequestedAtLessThanEqualOrderByRequestedAtDesc(String accountId, String accountInitiatorId,
                         String status,LocalDateTime acceptedAt, Pageable pageable);
-//        Optional<Friend> findFriendshipBetweenUsers(String accountId1, String accountId2);
-
 
         Optional<Friend> findByAccountUser_IdAndAccountFriend_IdAndStatus(String AccountUser_id,
                         String AccountFriend_Id, String status);
 
+        List<Friend> findByAccountUser_IdAndAccountInitiator_IdNotAndStatusAndRequestedAtBetweenOrderByRequestedAtDesc(
+                String accountId, String initiatorId, String status, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
 
         Optional<Friend> findByAccountUser_IdAndAccountFriend_Id(String AccountUser_id, String AccountFriend_Id);
 
@@ -46,8 +46,8 @@ public interface FriendRepository extends JpaRepository<Friend, Integer> {
                 "AND f.accountInitiator.id NOT IN :accountUserId " +
                 "AND f.status IN :status "
         )
-        int countFriendInvited (@Param("accountUserId") String accountUserId,
-                         @Param("status") String status);
+        int countFriendReceived(@Param("accountUserId") String accountUserId,
+                                @Param("status") String status);
 
         @Query("SELECT COUNT(f) FROM  Friend f " +
                 "WHERE f.accountUser.id IN :accountUserId " +

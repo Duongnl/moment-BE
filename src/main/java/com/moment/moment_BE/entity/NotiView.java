@@ -28,6 +28,9 @@ public class NotiView {
     @Column(name = "viewed_at")
     private LocalDateTime viewedAt;
 
+    @Column(name = "status")
+    private String status;
+
     @ManyToOne
     @JoinColumn(name = "noti_id", nullable = false, referencedColumnName = "id")
     @JsonBackReference

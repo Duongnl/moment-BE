@@ -6,6 +6,8 @@ import org.springframework.http.HttpStatus;
 @Getter
 public enum PhotoErrorCode implements ErrorCode {
     SAVE_PHOTO_FAIL("PHOTO_1","Save photo is fail", HttpStatus.BAD_REQUEST),
+    PHOTO_NOT_FOUND("PHOTO_2","Photo not found", HttpStatus.BAD_REQUEST),
+
     ;
 
 

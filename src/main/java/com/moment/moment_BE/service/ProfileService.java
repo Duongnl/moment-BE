@@ -29,13 +29,12 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import static com.moment.moment_BE.utils.DateTimeUtils.convertUtcToUserLocalTime;
 
 @Service
-// kh khai bao gi het thi no autowired va private
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ProfileService {
@@ -43,99 +42,102 @@ public class ProfileService {
     ProfileRepository profileRepository;
     AccountMapper accountMapper;
     AccountController accountController;
+    AccountService accountService; // Thêm AccountService
     AccountRepository accountRepository;
     PhotoMapper photoMapper;
     PhotoController photoController;
     PhotoRepository photoRepository;
     PhotoService photoService;
-    AuthenticationService authenticationService ;
+    AuthenticationService authenticationService;
     FriendRepository friendRepository;
 
-
-
-    public ProfileResponse getProfileByUserName(ProfileFilterRequest profileFilterRequest)
-    {
+    public ProfileResponse getProfileByUserName(ProfileFilterRequest profileFilterRequest) {
+        // Lấy thông tin tài khoản đang đăng nhập
         var context = SecurityContextHolder.getContext();
-        String name = context.getAuthentication().getName();
-        Account account = accountRepository.findByUserNameAndStatus(name, 1).orElseThrow(
-                () -> new AppException(AccountErrorCode.USER_NOT_FOUND)
-        );
+        String currentUsername = context.getAuthentication().getName();
+        Account currentAccount = accountRepository.findByUserNameAndStatus(currentUsername, 1)
+                .orElseThrow(() -> new AppException(AccountErrorCode.USER_NOT_FOUND));
 
-
-
-
-        Profile pro =  profileRepository.findByAccount_UserName(profileFilterRequest.getUserName());
-        if (pro == null) {
+        // Lấy thông tin profile của tài khoản cần tìm
+        Profile profile = profileRepository.findByAccount_UserName(profileFilterRequest.getUserName());
+        if (profile == null) {
             throw new AppException(AccountErrorCode.USER_NOT_FOUND);
         }
 
+        // Tạo đối tượng response
+        ProfileResponse profileResponse = new ProfileResponse();
+        profileResponse.setIdAccount(profile.getAccount().getId());
+        profileResponse.setId(profile.getId());
+        profileResponse.setUserName(profile.getAccount().getUserName());
+        profileResponse.setName(profile.getName());
+        profileResponse.setQuantityFriend(profile.getAccount().getFriends().size());
 
-
-        ProfileResponse profileResponse =  new ProfileResponse();
-        profileResponse.setIdAccount(pro.getAccount().getId());
-        profileResponse.setId(pro.getId());
-        profileResponse.setUserName(pro.getAccount().getUserName());
-        profileResponse.setName(pro.getName());
-        profileResponse.setQuantityFriend(pro.getAccount().getFriends().size());
-
-        LocalDateTime localDateTime = null;
+        // Xử lý thời gian
+        LocalDateTime localDateTime;
         try {
-            localDateTime =  convertUtcToUserLocalTime(
-                    profileFilterRequest.getTime()
-            );
-        }catch (Exception e) {
+            localDateTime = convertUtcToUserLocalTime(profileFilterRequest.getTime());
+        } catch (Exception e) {
             throw new AppException(InValidErrorCode.TIME_ZONE_INVALID);
-        };
-
-        String friendStatus;
-        if (account.getId().equals(pro.getAccount().getId()) )
-        {
-            friendStatus = "me";
         }
-        else {
-            friendStatus = friendRepository
-                    .findByAccountUser_IdAndAccountFriend_Id(
-                            account.getId(), pro.getAccount().getId()
-                    )
-                    .map(Friend::getStatus)
-                    .orElse("none");
+
+        // Lấy trạng thái bạn bè
+        String friendStatus;
+        if (currentAccount.getId().equals(profile.getAccount().getId())) {
+            friendStatus = "me";
+        } else {
+            friendStatus = friendRepository.findByAccountUser_IdAndAccountFriend_Id(
+                    currentAccount.getId(), profile.getAccount().getId()
+            ).map(Friend::getStatus).orElse("none");
+
+            // Kiểm tra nếu đang chờ xác nhận từ người dùng (received)
+            Optional<Friend> friendOptional = friendRepository.findByAccountUser_IdAndAccountFriend_Id(
+                    currentAccount.getId(), profile.getAccount().getId()
+            );
+            boolean isInitiator = false;
+            if (friendOptional.isPresent())
+            {
+                Friend friend = friendOptional.get();
+//                isInitiator = friend.getAccountInitiator();
+                if(friend.getAccountInitiator() == friend.getAccountUser())
+                {
+                    isInitiator = true;
+                }
+                else {
+                    isInitiator = false;
+                }
+
+            }
+
+//            System.out.println("this is init " + isInitiator);
+//
+            friendStatus = accountService.determineFriendStatus(friendStatus, isInitiator).name();
+//            System.out.println("this is friendStatus " + friendStatus);
+
         }
 
         profileResponse.setFriendStatus(friendStatus);
 
+        // Nếu là bạn bè hoặc chính chủ, lấy danh sách ảnh
+        if (currentAccount.getId().equals(profile.getAccount().getId()) || "accepted".equals(friendStatus)) {
+            Pageable pageable = PageRequest.of(profileFilterRequest.getPageCurrent(), 6);
 
-        if ( account.getId().equals( pro.getAccount().getId())|| "accepted".equals(friendStatus) ||
-                friendRepository.findByAccountUser_IdAndAccountFriend_IdAndStatus(account.getId() , pro.getAccount().getId(), "accepted").isPresent())
-        {
+            List<Photo> photos = photoRepository.findByAccount_IdAndStatusAndCreatedAtLessThanEqualOrderByCreatedAtDesc(
+                    profile.getAccount().getId(), 1, localDateTime, pageable
+            );
 
-        Pageable pageable = PageRequest.of(profileFilterRequest.getPageCurrent(), 6);
+            List<PhotoResponse> photoResponses = new ArrayList<>();
+            for (Photo photo : photos) {
+                PhotoResponse photoResponse = photoMapper.toPhotoResponse(photo);
+                accountMapper.toPhotoResponse(photoResponse, photo.getAccount());
+                photoResponse.setUrlAvt(photoService.getUrlAvtAccount(photo.getAccount().getId()));
 
-        List<Photo> photos = photoRepository.findByAccount_IdAndStatusAndCreatedAtLessThanEqualOrderByCreatedAtDesc(pro.getAccount().getId(),
-                1,
-                localDateTime,
-                pageable);
-        List<PhotoResponse> photoResponses = new ArrayList<>();
-
-        for (Photo photo : photos ) {
-            PhotoResponse photoResponse = photoMapper.toPhotoResponse(photo);
-            accountMapper.toPhotoResponse(photoResponse, photo.getAccount());
-            photoResponse.setUrlAvt(photoService.getUrlAvtAccount(photo.getAccount().getId()));
-
-            photoResponses.add(photoResponse);
-        }
-        profileResponse.setListPhotoProfile(photoResponses);
-
+                photoResponses.add(photoResponse);
+            }
+            profileResponse.setListPhotoProfile(photoResponses);
         }
 
-        profileResponse.setUrlAvt(photoService.getUrlAvtAccount(pro.getAccount().getId()));
+        profileResponse.setUrlAvt(photoService.getUrlAvtAccount(profile.getAccount().getId()));
 
         return profileResponse;
     }
-//    public String getStatus(String accountId)
-//    {
-//        return friendRepository.findByAccount_IdAndAccountFriend_IdOrAccountFriend_IdAndAccount_Id(
-//                account.getId(), accountId, accountId, account.getId()
-//                ).map(Friend::getStatus).orElse("not_friends");
-//    }
-
 }

@@ -4,15 +4,12 @@ import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
 @Getter
-public enum NotiErrorCode implements ErrorCode{
-    SAVE_NOTI_FAIL("NOTI_1","Save noti is fail", HttpStatus.BAD_REQUEST),
-    NOTI_NOT_FOUND("NOTI_2","Noti not found", HttpStatus.BAD_REQUEST)
-
+public enum NotiViewErrorCode implements ErrorCode {
+    SAVE_NOTI_VIEW_FAIL("NOTI_VIEW_1","Save noti view is fail", HttpStatus.BAD_REQUEST),
     ;
 
 
-
-    NotiErrorCode(String code, String message, HttpStatus httpStatus) {
+    NotiViewErrorCode(String code, String message, HttpStatus httpStatus) {
         this.code = code;
         this.message = message;
         this.httpStatus = httpStatus;
