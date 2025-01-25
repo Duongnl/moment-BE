@@ -51,6 +51,14 @@ public class PhotoController {
                 .build();
     }
 
+    @PostMapping("/change-avatar")
+    public ApiResponse<?> changeAvatar(@RequestBody @Valid PostRequest postRequest) {
+
+        photoService.changeAvatar(postRequest);
+        return ApiResponse.builder()
+                .build();
+    }
+
     @GetMapping()
     public ApiResponse<PhotoResponse> getPhoto(@RequestParam String post) {
         return ApiResponse.<PhotoResponse>builder()
