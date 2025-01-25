@@ -145,11 +145,13 @@ public class PhotoService {
         }
 
         //       kiem tra xem co phai la ban be cua nhau khong
+
         Account account = authenticationService.getMyAccount(1);
         Optional<Friend> friend = friendRepository.findByAccountUser_IdAndAccountFriend_IdAndStatus(account.getId(), photo.getAccount().getId(), "accepted");
-        if (friend.isEmpty()) {
+        if (friend.isEmpty() && !account.getUserName().equals(photo.getAccount().getUserName())) {
             throw new AppException(FriendErrorCode.FRIEND_NOT_FOUND);
         }
+
 
         PhotoResponse photoResponse = photoMapper.toPhotoResponse(photo);
         accountMapper.toPhotoResponse(photoResponse, photo.getAccount());
