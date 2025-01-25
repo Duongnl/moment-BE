@@ -177,4 +177,32 @@ public class PhotoService {
 
         return photoResponse;
     }
+
+    public void changeAvatar(PostRequest postRequest) {
+        Account account = authenticationService.getMyAccount(1);
+        Photo photo = photoRepository.findByAccount_IdAndStatus(account.getId(), 2);
+        LocalDateTime localDateTime = getCurrentTimeInSystemLocalTime();
+        if (photo != null) {
+            photo.setUrl(postRequest.getUrl());
+            photo.setCreatedAt(localDateTime);
+            try {
+                photoRepository.save(photo);
+            } catch (Exception e) {
+                throw new AppException(PhotoErrorCode.SAVE_PHOTO_FAIL);
+            }
+        } else {
+            photo = new Photo();
+            photo.setUrl(postRequest.getUrl());
+            photo.setAccount(account);
+            photo.setCaption(null);
+            photo.setStatus(2);
+            photo.setCreatedAt(localDateTime);
+            try {
+                photoRepository.save(photo);
+            } catch (Exception e) {
+                throw new AppException(PhotoErrorCode.SAVE_PHOTO_FAIL);
+            }
+        }
+
+    }
 }
