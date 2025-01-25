@@ -221,7 +221,7 @@ public class AccountService {
         };
     }
 
-    private FriendStatus determineFriendStatus(String status, boolean isInitiator) {
+    public FriendStatus determineFriendStatus(String status, boolean isInitiator) {
         return switch (status) {
             case "me" -> FriendStatus.me;
             case "accepted" -> FriendStatus.accepted;

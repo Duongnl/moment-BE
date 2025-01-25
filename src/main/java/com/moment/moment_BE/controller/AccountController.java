@@ -107,7 +107,7 @@ public class AccountController {
 
     @PutMapping("friend/status")
     public ApiResponse<?> changeFriendStatus(@RequestBody @Valid FriendInviteRequest friendInviteRequest) {
-
+        System.out.println("vao dc change status");
         AccountResponse friendResponse =accountService.changeStatusFriend(friendInviteRequest,1);
 
         return ApiResponse.builder().result(friendResponse).build();

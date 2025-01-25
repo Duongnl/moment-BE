@@ -20,4 +20,7 @@ public class ProfileController {
     public ApiResponse<?> getAll(@RequestBody @Valid ProfileFilterRequest profileFilter) {
              return ApiResponse.builder().result(profileService.getProfileByUserName(profileFilter)).build();
     }
+
+//    @GetMapping("/getStatus")
+//    public ApiResponse<?> getStatus ()
 }
