@@ -56,6 +56,28 @@ public class AuthenticationController {
     }
 
 
+    @GetMapping("/google-login")
+    public ApiResponse<AuthenticationResponse> authenticateLoginGoogle(@RequestParam String code) {
+
+
+        if (code == null || code.isEmpty()) {
+            return ApiResponse.<AuthenticationResponse>builder()
+                    .status(401)
+                    .message("Invalid Google token")
+                    .build();
+        } else {
+            AuthenticationResponse authenticationResponse = new AuthenticationResponse();
+            String token=authenticationService.getToken(code);
+            System.out.println(token);
+            authenticationResponse.setToken(token);
+            authenticationResponse.setAuthenticated(true);
+            return ApiResponse.<AuthenticationResponse>builder()
+                    .result(authenticationResponse)
+                    .build();
+        }
+
+
+    }
 
 
 }
