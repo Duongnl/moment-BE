@@ -24,5 +24,6 @@ public class UserResponse {
     LocalDate birthday;
     String address;
     String urlPhoto;
+    String sex;
     int status;
 }

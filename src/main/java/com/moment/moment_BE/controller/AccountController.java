@@ -132,7 +132,7 @@ public class AccountController {
     }
 
     @PutMapping("/setting")
-    public ApiResponse<Void> updateAccountInfo(@RequestBody AccountInfoRequest updateRequest) {
+    public ApiResponse<Void> updateAccountInfo(@RequestBody @Valid AccountInfoRequest updateRequest) {
         // Lấy tên người dùng hiện tại từ ngữ cảnh bảo mật
         var context = SecurityContextHolder.getContext();
         String userName = context.getAuthentication().getName();
@@ -145,7 +145,7 @@ public class AccountController {
     }
 
     @PutMapping("change-username")
-    public ApiResponse<Void> changeUserName(@RequestBody AccountInfoRequest updateRequest) {
+    public ApiResponse<Void> changeUserName(@RequestBody @Valid AccountInfoRequest updateRequest) {
         var context = SecurityContextHolder.getContext();
         String userName = context.getAuthentication().getName();
         accountService.changUserName(userName, updateRequest.getUserName());
@@ -154,7 +154,7 @@ public class AccountController {
     }
 
     @PutMapping("/change-password")
-    public ApiResponse<Void> changePassword(@RequestBody ChangePasswordRequest request) {
+    public ApiResponse<Void> changePassword(@RequestBody @Valid ChangePasswordRequest request) {
         // Lấy tên người dùng hiện tại từ ngữ cảnh bảo mật
         var context = SecurityContextHolder.getContext();
         String userName = context.getAuthentication().getName();

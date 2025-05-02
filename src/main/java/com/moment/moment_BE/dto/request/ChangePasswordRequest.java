@@ -1,5 +1,8 @@
 package com.moment.moment_BE.dto.request;
 
+import com.moment.moment_BE.exception.Regex;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
 import lombok.Setter;
 
