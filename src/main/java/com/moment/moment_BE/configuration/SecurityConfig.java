@@ -40,6 +40,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(request ->
                         request
                                 .requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS).permitAll()
+                                .requestMatchers(HttpMethod.GET, "/auth/google-login").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/ws/**").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/ws/**").permitAll()
                                 .anyRequest().authenticated());

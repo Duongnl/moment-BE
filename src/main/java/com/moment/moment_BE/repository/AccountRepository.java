@@ -23,6 +23,9 @@ public interface AccountRepository extends JpaRepository<Account, String> {
             String name,
             int status,
             Pageable Pageable);
+
+    Optional<Account> findByEmailAndStatus(String email, int status);
+
 }
 
 

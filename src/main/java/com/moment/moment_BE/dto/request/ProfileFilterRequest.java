@@ -13,7 +13,7 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ProfileFilterRequest {
-    @Pattern(regexp = Regex.USER_NAME,message = "USER_NAME_INVALID")
+//    @Pattern(regexp = Regex.USER_NAME_EMAIL,message = "USER_NAME_INVALID")
     @NotNull(message = "USER_NAME_INVALID")
     String userName;
     int pageCurrent;

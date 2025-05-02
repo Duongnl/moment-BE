@@ -7,6 +7,7 @@ import com.moment.moment_BE.dto.response.IntrospectResponse;
 import com.moment.moment_BE.dto.response.UserResponse;
 import com.moment.moment_BE.entity.Account;
 import com.moment.moment_BE.entity.Photo;
+import com.moment.moment_BE.entity.Profile;
 import com.moment.moment_BE.exception.AccountErrorCode;
 import com.moment.moment_BE.exception.AppException;
 import com.moment.moment_BE.exception.AuthErrorCode;
@@ -14,6 +15,7 @@ import com.moment.moment_BE.mapper.AccountMapper;
 import com.moment.moment_BE.mapper.ProfileMapper;
 import com.moment.moment_BE.repository.AccountRepository;
 import com.moment.moment_BE.repository.PhotoRepository;
+import com.moment.moment_BE.repository.ProfileRepository;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
@@ -24,13 +26,20 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 
 import java.text.ParseException;
+import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.Map;
+
+import static com.moment.moment_BE.utils.DateTimeUtils.getCurrentTimeInSystemLocalTime;
 
 @Service
 @RequiredArgsConstructor
@@ -38,10 +47,23 @@ import java.util.Date;
 public class AuthenticationService {
 
     AccountRepository accountRepository;
+    ProfileRepository profileRepository;
 
     @NonFinal// de no kh inject vao contructe cua clombok
     @Value("${jwt.signerKey}")
     String SIGNER_KEY;
+
+    @NonFinal
+    @Value("${spring.security.oauth2.client.registration.google.client-id}")
+    String clientId;
+
+    @NonFinal
+    @Value("${spring.security.oauth2.client.registration.google.client-secret}")
+     String clientSecret;
+
+    @NonFinal
+    @Value("${spring.security.oauth2.client.registration.google.redirect-uri}")
+     String redirectUri;
 
     AccountMapper accountMapper;
     ProfileMapper profileMapper;
@@ -202,5 +224,52 @@ public class AuthenticationService {
     }
 
 
+    @Transactional
+    public String getToken (String code){
+        String tokenUrl = "https://oauth2.googleapis.com/token";
+        Map<String, String> params = Map.of(
+                "code", code,
+                "client_id", clientId,
+                "client_secret", clientSecret,
+                "redirect_uri", redirectUri,
+                "grant_type", "authorization_code"
+        );
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<Map> response = restTemplate.postForEntity(tokenUrl, params, Map.class);
+        Map<String, Object> tokenData = response.getBody();
+        String accessToken = (String) tokenData.get("access_token");
+
+        // 2️⃣ Lấy thông tin user từ Google
+        String userInfoUrl = "https://www.googleapis.com/oauth2/v3/userinfo?access_token=" + accessToken;
+        ResponseEntity<Map> userResponse = restTemplate.getForEntity(userInfoUrl, Map.class);
+        Map<String, Object> userInfo = userResponse.getBody();
+
+        String email = (String) userInfo.get("email");
+
+        Account user = accountRepository.findByEmailAndStatus(email,1)
+                .orElseGet(() -> {
+                    LocalDateTime localDateTime = getCurrentTimeInSystemLocalTime();
+                    String name = (String) userInfo.get("given_name");
+
+                    Profile profile = new Profile();
+                    profile.setName(name);
+
+                    Account newAccount = new Account();
+                    newAccount.setEmail(email);
+                    newAccount.setUserName(email);
+                    newAccount.setStatus(1);
+                    newAccount.setCreatedAt(localDateTime);
+                    newAccount.setProfile(profile);
+                    newAccount.setPassword("");
+
+                    profile.setAccount(newAccount);
+                    accountRepository.save(newAccount);
+                    profileRepository.save(profile);
+                    return newAccount;
+                });
+
+        // 4️⃣ Tạo JWT token và gửi về FE
+        return generateToken(user);
+    }
 }
 

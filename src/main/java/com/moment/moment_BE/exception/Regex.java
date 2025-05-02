@@ -12,6 +12,7 @@ public final class Regex {
     public static final String SEX = "^(male|female|other)$";
     public static final String NOTI_STATUS = "^(unread|all)$";
     public static final String NAME = "^(?=(.*\\p{L}){2,})[\\p{L} ]{2,255}$";
+    public static final String USER_NAME_EMAIL = "^[a-zA-Z0-9]([._-](?![._-])|[a-zA-Z0-9]){3,18}[a-zA-Z0-9](@gmail\\.com)?$";
 
 
 
