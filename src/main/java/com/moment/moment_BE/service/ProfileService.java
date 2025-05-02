@@ -59,7 +59,7 @@ public class ProfileService {
                 .orElseThrow(() -> new AppException(AccountErrorCode.USER_NOT_FOUND));
 
         // Lấy thông tin profile của tài khoản cần tìm
-        Profile profile = profileRepository.findByAccount_UserName(profileFilterRequest.getUserName());
+        Profile profile = profileRepository.findByAccount_UserName(profileFilterRequest.getUserName().replace("%40", "@"));
         if (profile == null) {
             throw new AppException(AccountErrorCode.USER_NOT_FOUND);
         }
