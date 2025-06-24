@@ -107,11 +107,7 @@ public class ProfileService {
                 }
 
             }
-
-//            System.out.println("this is init " + isInitiator);
-//
             friendStatus = accountService.determineFriendStatus(friendStatus, isInitiator).name();
-//            System.out.println("this is friendStatus " + friendStatus);
 
         }
 

@@ -27,6 +27,7 @@ public interface CommentRepository extends JpaRepository<Comment, Integer> {
                   :beforeCreatedAt IS NULL OR 
                   (c.createdAt < :beforeCreatedAt)
                 )
+                AND c.parentComment IS NULL
               ORDER BY c.createdAt DESC, c.id DESC
             """)
     Page<Comment> findCommentsByPhotoWithCursor(

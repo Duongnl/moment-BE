@@ -42,11 +42,6 @@ public class AccountController {
 //        list
         Set<Friend> friends = accounts.get(1).getFriends();
 
-        friends.forEach(f -> {
-            System.out.println(f.getAccountFriend().getProfile());
-
-        });
-
         return accountService.getAll();
     }
 
@@ -107,7 +102,6 @@ public class AccountController {
 
     @PutMapping("/friend/status")
     public ApiResponse<?> changeFriendStatus(@RequestBody @Valid FriendInviteRequest friendInviteRequest) {
-        System.out.println("vao dc change status");
         AccountResponse friendResponse =accountService.changeStatusFriend(friendInviteRequest,1);
 
         return ApiResponse.builder().result(friendResponse).build();

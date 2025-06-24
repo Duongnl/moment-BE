@@ -68,7 +68,6 @@ public class PhotoService {
             localDateTime = convertUtcToUserLocalTime(
                     photoFilterRequest.getTime()
             );
-            System.out.println("localDateTime request >>> " + localDateTime);
         } catch (Exception e) {
             throw new AppException(InValidErrorCode.TIME_ZONE_INVALID);
         }
@@ -81,7 +80,6 @@ public class PhotoService {
         List<PhotoResponse> photoResponses = new ArrayList<>();
         for (Photo photo : photos) {
             PhotoResponse photoResponse = photoMapper.toPhotoResponse(photo);
-            System.out.println("slug >>>> " + photoResponse.getSlug());
             accountMapper.toPhotoResponse(photoResponse, photo.getAccount());
             photoResponse.setUrlAvt(getUrlAvtAccount(photo.getAccount().getId()));
             photoResponses.add(photoResponse);
@@ -119,11 +117,9 @@ public class PhotoService {
                 () -> new AppException(AccountErrorCode.USER_NOT_FOUND)
         );
 
-        LocalDateTime localDateTime = getCurrentTimeInSystemLocalTime();
-        System.out.println("localDateTime post >>> " + localDateTime);
         Photo photo = photoMapper.toPhoto(postRequest);
         photo.setAccount(account);
-        photo.setCreatedAt(localDateTime);
+        photo.setCreatedAt(getCurrentTimeInSystemLocalTime());
         photo.setStatus(1);
 
         try {

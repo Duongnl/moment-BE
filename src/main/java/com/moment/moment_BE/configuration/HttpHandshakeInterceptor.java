@@ -52,7 +52,6 @@ public class HttpHandshakeInterceptor implements HandshakeInterceptor {
                 return false;
             }
 
-            System.out.println("username >>> " + userName);
 
             // Lưu vào attributes để sử dụng sau này
             attributes.put("userName", userName);

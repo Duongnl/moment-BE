@@ -32,10 +32,6 @@ public class PhotoController {
         List<PhotoResponse> photos = photoService.getListPhotoMyFriends(
                 photoFilterRequest, 1
         );
-        System.out.println("get >>>>>>> "+convertUtcToUserLocalTime(
-                photoFilterRequest.getTime()
-        ));
-        System.out.println("get time server >>>>>>> "+getCurrentTimeInSystemLocalTime());
 
         return ApiResponse.<List<PhotoResponse>>builder()
                 .result(photos)

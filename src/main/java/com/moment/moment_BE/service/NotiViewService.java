@@ -45,7 +45,6 @@ public class NotiViewService {
             try {
                 notiViewRepository.save(notiView);
             } catch (Exception e) {
-                System.out.println(e.getMessage());
                 throw new AppException(NotiViewErrorCode.SAVE_NOTI_VIEW_FAIL);
             }
 

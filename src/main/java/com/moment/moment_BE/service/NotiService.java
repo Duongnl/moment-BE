@@ -120,7 +120,6 @@ public class NotiService {
             if (friend.getStatus().equals("accepted")) {
 
                 if (userRegistry.getUser(friend.getAccountFriend().getUserName()) != null) {
-                    System.out.println("send friend >>> " + friend.getAccountFriend().getUserName());
                     NotiResponse notiResponse = convertNotiToNotiResponseNoStatus(noti);
                     notiResponse.setStatus("new");
                 messagingTemplate.convertAndSendToUser(friend.getAccountFriend().getUserName(), "/queue/noti", notiResponse);

@@ -37,7 +37,6 @@ public class NotiController {
 
     @PostMapping("/get")
     public ApiResponse<List<NotiResponse>> getNoti(@RequestBody @Valid NotiFilterRequest notiFilterRequest) {
-        System.out.println("noti filter request: " + notiFilterRequest);
         return ApiResponse.<List<NotiResponse>>builder()
                 .result(notiService.getNoti(notiFilterRequest))
                 .currentPage(notiFilterRequest.getPageCurrent())
