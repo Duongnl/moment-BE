@@ -60,6 +60,7 @@ public class AccountService {
     PhotoService photoService;
     FriendRepository friendRepository;
     SimpMessagingTemplate messagingTemplate;
+    NotiPushService notiPushService;
 
     public List<Account> getAll() {
         return accountRepository.findAll();
@@ -280,6 +281,11 @@ public class AccountService {
         friendRepository.save(createFriend(accountFriend, account, account));
 
         pushRequestFriendSocket("pending", account, accountFriend.getUserName());
+        notiPushService.sendPushNotiPerAccount(accountFriend,
+                "Lời mời kết bạn mới",
+                account.getProfile().getName() + " đã gửi cho " + accountFriend.getProfile().getName() + " lời mời kết bạn",
+                "/friends");
+
         return toAccountResponse(accountFriend, "pending", getCurrentTimeInSystemLocalTime(), true);
     }
 
@@ -322,6 +328,11 @@ public class AccountService {
                 }
                 if (Objects.equals(friend.getStatus(), "pending") && Objects.equals(friendRP.getStatus(), "pending")) {
                     updateFriendStatus(friend, friendRP, "accepted");
+                    notiPushService.sendPushNotiPerAccount(accountFriend,
+                            "Lời mời kết bạn",
+                            account.getProfile().getName() + " đã chấp nhận lời mời kết bạn",
+                            "/"
+                    );
                 }
 
             }

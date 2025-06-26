@@ -26,7 +26,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.moment.moment_BE.utils.DateTimeUtils.convertUtcToUserLocalTime;
 import static com.moment.moment_BE.utils.DateTimeUtils.getCurrentTimeInSystemLocalTime;
 
 @Service
@@ -40,7 +39,8 @@ public class NotiService {
     AuthenticationService authenticationService;
     SimpMessagingTemplate messagingTemplate;
     PhotoRepository photoRepository;
-     SimpUserRegistry userRegistry;
+    SimpUserRegistry userRegistry;
+    NotiPushService notiPushService;
 
     public  List<NotiResponse> getNoti(NotiFilterRequest notiFilterRequest) {
 //        lay thong tin nguoi dung dang dang nhap
@@ -121,8 +121,11 @@ public class NotiService {
 
                 if (userRegistry.getUser(friend.getAccountFriend().getUserName()) != null) {
                     NotiResponse notiResponse = convertNotiToNotiResponseNoStatus(noti);
+                    notiPushService.sendPushNotiPerAccount(friend.getAccountFriend(),"Bài đăng mới",
+                            account.getProfile().getName() + "đã đăng ảnh mới cho " +friend.getAccountFriend().getUserName(),
+                            "/?post="+photo.getId());
                     notiResponse.setStatus("new");
-                messagingTemplate.convertAndSendToUser(friend.getAccountFriend().getUserName(), "/queue/noti", notiResponse);
+                    messagingTemplate.convertAndSendToUser(friend.getAccountFriend().getUserName(), "/queue/noti", notiResponse);
                 }
 
             }

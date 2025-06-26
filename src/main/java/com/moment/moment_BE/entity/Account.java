@@ -66,7 +66,9 @@ public class Account {
     private Set<Friend> friends;
 
 
-
+    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private Set<FcmTokenEntity> fcmTokens;
 
 
 }

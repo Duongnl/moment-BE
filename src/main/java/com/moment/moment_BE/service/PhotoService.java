@@ -47,7 +47,7 @@ public class PhotoService {
     AccountRepository accountRepository;
     NotiService notiService;
     NotiViewRepository notiViewRepository;
-    private final FriendRepository friendRepository;
+    FriendRepository friendRepository;
 
     // lay anh cua ban be o pageCurrent voi so luong size tu thoi gian startTime voi status
     public List<PhotoResponse> getListPhotoMyFriends(PhotoFilterRequest photoFilterRequest, int status) {
