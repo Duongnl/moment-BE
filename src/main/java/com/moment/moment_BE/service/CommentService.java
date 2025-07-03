@@ -44,7 +44,6 @@ public class CommentService {
     CommentMapper commentMapper;
     SimpMessagingTemplate messagingTemplate;
 
-//    private final PhotoRepository photoRepository;
 
 
     @Transactional
@@ -53,6 +52,10 @@ public class CommentService {
                 .findById(request.getCommentId())
                 .orElseThrow(() -> new AppException(CommentErrorCode.COMMENT_NOT_FOUND));
 
+        Account account =authenticationService.getMyAccount(1);
+        if(!Objects.equals(account.getId(), comment.getAccount().getId())){
+            throw new AppException(CommentErrorCode.COMMENT_DELETE_CONDITION_NOT_MET);
+        }
         // Cập nhật status
         comment.setStatus(request.getStatus());
         CommentResponse response = commentMapper.toCommentResponse(comment);
