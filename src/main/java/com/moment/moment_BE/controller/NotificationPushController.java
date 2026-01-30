@@ -1,14 +1,15 @@
 package com.moment.moment_BE.controller;
 
 import com.google.firebase.messaging.FirebaseMessagingException;
-import com.moment.moment_BE.dto.FcmTokenRequest;
+import com.moment.moment_BE.dto.FCMTokenRequest;
+import com.moment.moment_BE.dto.FCMTokenResponse;
 import com.moment.moment_BE.dto.PushRequest;
 import com.moment.moment_BE.dto.response.ApiResponse;
+import com.moment.moment_BE.entity.FcmToken;
 import com.moment.moment_BE.service.TokenService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -20,14 +21,10 @@ public class NotificationPushController {
     TokenService tokenService;
 
     @PostMapping("/save-token")
-    public ResponseEntity<String> saveToken(@RequestBody FcmTokenRequest request) {
-        if (request.getToken() == null || request.getToken().isEmpty()) {
-            return ResponseEntity.badRequest().body("Token không hợp lệ");
-        }
-        if (tokenService.isSavedToken(request))
-
-            return ResponseEntity.ok("Đã lưu token");
-        else return ResponseEntity.ok("Lưu token thất bại");
+    public ApiResponse<FCMTokenResponse> saveToken(@RequestBody FCMTokenRequest request) {
+        return ApiResponse.<FCMTokenResponse>builder()
+                .result(tokenService.savedToken(request))
+                .build();
     }
 
     @PostMapping("/send")
@@ -54,13 +51,15 @@ public class NotificationPushController {
     }
 
     @PostMapping("/delete")
-    public ApiResponse<String> deleteToken(@RequestBody FcmTokenRequest request) {
+    public ApiResponse<String> deleteToken(@RequestBody FCMTokenRequest request) {
         if (tokenService.isDeleteByToken(request))
         return ApiResponse.<String>builder()
                 .result("Xóa thành công")
+                .status(200)
                 .build();
         else return ApiResponse.<String>builder()
                 .result("Xóa token không thành công")
+                .status(400)
                 .build();
     }
 

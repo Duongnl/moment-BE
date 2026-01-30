@@ -68,7 +68,7 @@ public class Account {
 
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
-    private Set<FcmTokenEntity> fcmTokens;
+    private Set<FcmToken> fcmTokens;
 
 
 }

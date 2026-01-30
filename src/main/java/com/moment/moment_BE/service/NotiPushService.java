@@ -4,8 +4,7 @@ import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingException;
 import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.MessagingErrorCode;
-import com.moment.moment_BE.entity.Account;
-import com.moment.moment_BE.entity.FcmTokenEntity;
+import com.moment.moment_BE.entity.FcmToken;
 import com.moment.moment_BE.repository.TokenRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -21,9 +20,10 @@ import java.util.List;
 public class NotiPushService {
     TokenRepository tokenRepository;
 
-    public void sendPushNotiPerAccount(Account account,String title,String body,String url) {
-        List<FcmTokenEntity> tokens = tokenRepository.findAllByAccountId(account.getId());
-        for (FcmTokenEntity token : tokens) {
+    public boolean sendPushNotiPerAccount(String accountReceiveId, String title, String body, String url) {
+        List<FcmToken> tokens = tokenRepository.findAllByAccountId(accountReceiveId);
+
+        for (FcmToken token : tokens) {
             try {
                 Message message = Message.builder()
                         .setToken(token.getToken())
@@ -31,15 +31,23 @@ public class NotiPushService {
                         .putData("body", body)
                         .putData("url", url)
                         .build();
+
                 FirebaseMessaging.getInstance().send(message);
-                return;
+
             } catch (FirebaseMessagingException ex) {
                 if (ex.getMessagingErrorCode() == MessagingErrorCode.UNREGISTERED) {
-                    tokenRepository.delete(token);
+                    try {
+//                        tokenRepository.deleteById(token.getId());
+                    } catch (Exception e) {
+                        System.out.println("Xóa token lỗi: " + token.getId() + " - " + e.getMessage());
+                    }
                 } else {
-                    System.out.println(ex);
+                    System.out.println("Lỗi FCM: " + ex.getMessage());
                 }
+                return false;
             }
         }
+        return true;
     }
+
 }

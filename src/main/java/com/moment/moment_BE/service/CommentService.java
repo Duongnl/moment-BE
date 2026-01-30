@@ -3,7 +3,6 @@ package com.moment.moment_BE.service;
 import com.moment.moment_BE.dto.request.comment.ChangeStatusRequest;
 import com.moment.moment_BE.dto.request.comment.CommentCreateRequest;
 import com.moment.moment_BE.dto.request.comment.CommentFilterRequest;
-import com.moment.moment_BE.dto.response.AccountResponse;
 import com.moment.moment_BE.dto.response.comment.CommentResponse;
 import com.moment.moment_BE.dto.response.comment.CommentSocketResponse;
 import com.moment.moment_BE.entity.Account;
@@ -32,7 +31,6 @@ import java.util.Objects;
 import java.util.Optional;
 
 import static com.moment.moment_BE.exception.CommentErrorCode.COMMENT_NOT_FOUND;
-import static com.moment.moment_BE.utils.DateTimeUtils.getCurrentTimeInSystemLocalTime;
 
 @Service
 @RequiredArgsConstructor
@@ -43,7 +41,7 @@ public class CommentService {
     AuthenticationService authenticationService;
     CommentMapper commentMapper;
     SimpMessagingTemplate messagingTemplate;
-
+    NotiPushService notiPushService;
 
 
     @Transactional
@@ -52,8 +50,8 @@ public class CommentService {
                 .findById(request.getCommentId())
                 .orElseThrow(() -> new AppException(CommentErrorCode.COMMENT_NOT_FOUND));
 
-        Account account =authenticationService.getMyAccount(1);
-        if(!Objects.equals(account.getId(), comment.getAccount().getId())){
+        Account account = authenticationService.getMyAccount(1);
+        if (!Objects.equals(account.getId(), comment.getAccount().getId())) {
             throw new AppException(CommentErrorCode.COMMENT_DELETE_CONDITION_NOT_MET);
         }
         // Cập nhật status
@@ -122,23 +120,29 @@ public class CommentService {
     @Transactional
     public CommentResponse createComment(CommentCreateRequest request) {
 
+        Account account = authenticationService.getMyAccount(1);
+
         // Kiểm tra photoId
         if (request.getPhotoId() == null) {
             throw new IllegalArgumentException("Photo ID là bắt buộc");
         }
 
         Optional<Photo> photo = photoRepository.findById(request.getPhotoId());
-        if (!photo.isPresent()) {
+        if (photo.isEmpty()) {
             throw new IllegalArgumentException("Không tìm thấy ảnh với ID: " + request.getPhotoId());
         }
 
-        Optional<Comment> commentParentOptional = Optional.empty();
+        Optional<Comment> commentParentOptional;
         Comment commentParent = null;
 
         if (request.getCommentParentId() != null) {
             commentParentOptional = commentRepository.findById(Integer.parseInt(request.getCommentParentId()));
             if (commentParentOptional.isPresent() && "active".equals(commentParentOptional.get().getStatus())) {
                 commentParent = commentParentOptional.get();
+                if (!Objects.equals(photo.get().getAccount().getId(), commentParent.getAccount().getId()))
+                    notiPushService.sendPushNotiPerAccount(commentParent.getAccount().getId(), "Bình luận",
+                            account.getProfile().getName() + " đã trả lời bình luận của bạn",
+                            "/?post=" + photo.get().getSlug());
             }
         }
 
@@ -146,16 +150,22 @@ public class CommentService {
                 .createdAt(LocalDateTime.now())
                 .parentComment(commentParent)
                 .status("active")
-                .account(authenticationService.getMyAccount(1))
+                .account(account)
                 .content(request.getContent())
                 .photo(photo.get()) // Sử dụng photo.get() vì đã kiểm tra
                 .build();
+        if (!Objects.equals(photo.get().getAccount().getId(), account.getId()))
+            notiPushService.sendPushNotiPerAccount(photo.get().getAccount().getId(), "Bình luận",
+                    account.getProfile().getName() + " đã bình luận ảnh của bạn",
+                    "/?post=" + photo.get().getSlug());
 
         Comment commentSaved = commentRepository.save(comment);
         CommentSocketResponse response = commentMapper.toCommentSocketResponse(comment);
         response.setReplyCount(0);
         response.setPath(buildCommentPath(commentSaved));
         pushRequestCommentSocket(response, request.getPhotoId());
+        CommentResponse commentResponse =commentMapper.toCommentResponse(comment);
+        commentResponse.setAuthorAvatar(getUrlAvtAccount(comment.getAccount().getId()));
         return commentMapper.toCommentResponse(comment);
     }
 
