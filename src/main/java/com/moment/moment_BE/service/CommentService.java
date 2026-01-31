@@ -160,10 +160,11 @@ public class CommentService {
                     "/?post=" + photo.get().getSlug());
 
         Comment commentSaved = commentRepository.save(comment);
-        CommentSocketResponse response = commentMapper.toCommentSocketResponse(comment);
-        response.setReplyCount(0);
-        response.setPath(buildCommentPath(commentSaved));
-        pushRequestCommentSocket(response, request.getPhotoId());
+        CommentSocketResponse commentSocketResponse = commentMapper.toCommentSocketResponse(comment);
+        commentSocketResponse.setReplyCount(0);
+        commentSocketResponse.setPath(buildCommentPath(commentSaved));
+        commentSocketResponse.setAuthorAvatar(getUrlAvtAccount(comment.getAccount().getId()));
+        pushRequestCommentSocket(commentSocketResponse, request.getPhotoId());
         CommentResponse commentResponse =commentMapper.toCommentResponse(comment);
         commentResponse.setAuthorAvatar(getUrlAvtAccount(comment.getAccount().getId()));
 
