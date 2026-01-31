@@ -121,7 +121,7 @@ public class NotiService {
 
                 if (userRegistry.getUser(friend.getAccountFriend().getUserName()) != null) {
                     NotiResponse notiResponse = convertNotiToNotiResponseNoStatus(noti);
-                    notiPushService.sendPushNotiPerAccount(friend.getAccountFriend(),"Bài đăng mới",
+                    notiPushService.sendPushNotiPerAccount(friend.getAccountFriend().getId(),"Bài đăng mới",
                             account.getProfile().getName() + "đã đăng ảnh mới cho " +friend.getAccountFriend().getUserName(),
                             "/?post="+photo.getId());
                     notiResponse.setStatus("new");

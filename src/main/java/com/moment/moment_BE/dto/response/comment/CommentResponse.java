@@ -12,6 +12,7 @@ import lombok.experimental.FieldDefaults;
 public class CommentResponse {
     String id;
     String authorId;
+    String userName;
     String authorName;
     String authorAvatar;
     String content;

@@ -3,6 +3,8 @@ package com.moment.moment_BE.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "fcm_token")
 @Getter
@@ -10,7 +12,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class FcmTokenEntity {
+public class FcmToken {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,4 +24,7 @@ public class FcmTokenEntity {
     @ManyToOne
     @JoinColumn(name = "account_id")
     private Account account;
+
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
 }
