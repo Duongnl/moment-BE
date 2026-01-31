@@ -7,6 +7,8 @@ spring:
     url: "${DATABASE_HOST}"
     username: "${DATABASE_USER}"
     password: "${DATABASE_PASSWORD}"
+
+
   jpa:
     hibernate:
       ddl-auto: update
